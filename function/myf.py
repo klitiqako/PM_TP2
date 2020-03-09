@@ -238,6 +238,9 @@ def f_MAXSR(MyInput, n_sim, d):
     return([x[: , i + 1], -SR[i + 1]])
         
         
-        
+def prtf_return(weights,industry_returns):
+    gross_ret = 1+(industry_returns)/100
+    ret = weights @ (gross_ret - 1 ) * 100
+    return(ret)
         
         
