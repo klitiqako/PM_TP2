@@ -12,7 +12,6 @@ P4_weights = []                         # 10x1
 P5_weights = []                         # 10x1
 P6_weights = []                         # 10x1
 P7_weights = []                         # 10x1
-P8_weights = []                         # 10x1
 
 P1_return = []                          # 1 x n
 P2_return = []                          # 1 x n 

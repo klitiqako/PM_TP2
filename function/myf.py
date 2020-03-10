@@ -51,12 +51,15 @@ def minvarpf(x, mu, risk_free_rate = 0., risk_free_allowed = False , tangency = 
     A = np.dot(np.dot(one_vec, covariance_matrixinv), np.ones(nb_ind))
     C = np.dot(np.dot(E_ret, covariance_matrixinv),E_ret)
     B = np.dot(np.dot(one_vec, covariance_matrixinv), E_ret)
-    
+    Delta = A * C - B ** 2
     
     if mu == []:
-        weight = covariance_matrixinv @ one_vec / (one_vec @ covariance_matrixinv @ one_vec)
-        min_var = weight @ covariance_matrix @ weight
-        mu = weight @ E_ret
+        mu = B/A
+        min_var = (A*mu^2-2*B*mu+C)/Delta
+        lmbda = (C - mu * B) / Delta
+        gma = (mu * A - B) / Delta 
+        weight = lmbda * np.dot(covariance_matrixinv,one_vec) + gma * np.dot(covariance_matrixinv, E_ret)
+               
         return(mu, np.sqrt(min_var), weight)
     else:
         
@@ -83,7 +86,7 @@ def minvarpf(x, mu, risk_free_rate = 0., risk_free_allowed = False , tangency = 
             
         else:
        
-            weight = np.dot(covariance_matrixinv, E_ret - risk_free_rate * one_vec) / B - risk_free_rate * A
+            weight = np.matmul(covariance_matrixinv, (E_ret - risk_free_rate * one_vec)) / (B - risk_free_rate * A)
             mu = (C - B * risk_free_rate) / (B - A * risk_free_rate)
             min_var = (C - 2 * risk_free_rate * B + risk_free_rate ** 2 * A) / (B - A * risk_free_rate) ** 2
             return(mu, np.sqrt(min_var), weight)
