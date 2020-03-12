@@ -74,15 +74,17 @@ for i in range(0,len(Book_to_Mkt_C)):
             Book_to_Mkt_C.iloc[i,j] = B_M_3
             
 ###############Q2
-betas = np.ones((len(df_Returns)-12,len(industries)))
+Months = df_Returns.index
+Months = Months.insert(1123,pd.to_datetime('20200201', format= '%Y%m%d'))
+betas = np.ones((len(Months)-12,len(industries)))
 betas= pd.DataFrame(betas)
-betas.index = df_Returns.index[12:]
+betas.index = Months[12:]
 betas.columns = industries
 
 
-for i in range(0,len(df_Returns)-12): 
+for i in range(0,len(Months)-12): 
     for j in range(0,len(industries)):
-        d = df_Firm_Size.index[12+i]
+        d = Months[12+i]
         d_Last12 = d - dateutil.relativedelta.relativedelta(months=11)
         X = df_Fama['Mkt-RF'][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
         X = sm.add_constant(X)
@@ -100,3 +102,21 @@ est = sm.OLS(Y,X).fit()
 beta = est.params[1]
 time_elapsed2 = (time.clock() - time_start)
 ##Analytical takes half as long
+
+###############Q3
+Idio_vol = np.ones((len(Months),len(industries)))
+Idio_vol= pd.DataFrame(Idio_vol[1:])
+Idio_vol.index = Months
+Idio_vol.columns = industries
+
+
+for i in range(0,len(Idio_vol)): 
+    for j in range(0,len(industries)):
+        d = Idio_vol.index[i]
+        d_Last12 = d - dateutil.relativedelta.relativedelta(months=1)
+        X = df_Fama.iloc[:,:3][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
+        X = sm.add_constant(X)
+        Y = df_Daily_Returns.iloc[:,j][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
+        est = sm.OLS(Y,X).fit()
+        std_resid = np.std(est.resid)
+        Idio_vol.iloc[i,j] = std_resid
