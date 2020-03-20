@@ -57,7 +57,7 @@ industries = df_Returns.columns
 Market_cap_C = df_Firm_Size*df_NB_Firms
 Momentum_C = df_Returns.rolling(12).mean()
 Momentum_C = pd.DataFrame.dropna(Momentum_C)
-Book_to_Mkt_C = np.ones((len(df_Returns),len(industries)))
+Book_to_Mkt_C = np.zeros((len(df_Returns),len(industries)))
 Book_to_Mkt_C= pd.DataFrame(Book_to_Mkt_C)
 Book_to_Mkt_C.index = df_Returns.index
 Book_to_Mkt_C.columns = industries
@@ -76,7 +76,7 @@ for i in range(0,len(Book_to_Mkt_C)):
 ###############Q2
 Months = df_Returns.index
 Months = Months.insert(1123,pd.to_datetime('20200201', format= '%Y%m%d'))
-betas = np.ones((len(df_Returns)-11,len(industries)))
+betas = np.zeros((len(df_Returns)-11,len(industries)))
 betas= pd.DataFrame(betas)
 betas.index = df_Returns.index[11:]
 betas.columns = industries
@@ -105,7 +105,7 @@ time_elapsed2 = (time.clock() - time_start)
 ##Analytical takes half as long
 
 ###############Q3
-Idio_vol = np.ones((len(df_Returns),len(industries)))
+Idio_vol = np.zeros((len(df_Returns),len(industries)))
 Idio_vol= pd.DataFrame(Idio_vol)
 Idio_vol.index = df_Returns.index
 Idio_vol.columns = industries
@@ -133,11 +133,11 @@ Momentum_C[Momentum_C == -99.99] = np.nan
 
 
 
-Rank_Vol = np.ones((len(betas),len(industries)))
-Rank_Book_Mkt = np.ones((len(betas),len(industries)))
-Rank_Mkt_cap = np.ones((len(betas),len(industries)))
-Rank_Momemtum = np.ones((len(betas),len(industries)))
-Rank_Betas = np.ones((len(betas),len(industries)))
+Rank_Vol = np.zeros((len(betas),len(industries)))
+Rank_Book_Mkt = np.zeros((len(betas),len(industries)))
+Rank_Mkt_cap = np.zeros((len(betas),len(industries)))
+Rank_Momemtum = np.zeros((len(betas),len(industries)))
+Rank_Betas = np.zeros((len(betas),len(industries)))
 
 Rank_Vol= pd.DataFrame(Rank_Vol)
 Rank_Book_Mkt= pd.DataFrame(Rank_Book_Mkt)
@@ -175,11 +175,11 @@ for i in range(0,len(betas)):
 
 
 #Equal-weighted
-Weight_Vol = np.ones((len(betas),len(industries)))
-Weight_Book_Mkt = np.ones((len(betas),len(industries)))
-Weight_Mkt_cap = np.ones((len(betas),len(industries)))
-Weight_Momemtum = np.ones((len(betas),len(industries)))
-Weight_Betas = np.ones((len(betas),len(industries)))
+Weight_Vol = np.zeros((len(betas),len(industries)))
+Weight_Book_Mkt = np.zeros((len(betas),len(industries)))
+Weight_Mkt_cap = np.zeros((len(betas),len(industries)))
+Weight_Momemtum = np.zeros((len(betas),len(industries)))
+Weight_Betas = np.zeros((len(betas),len(industries)))
 
 Weight_Vol= pd.DataFrame(Weight_Vol)
 Weight_Book_Mkt= pd.DataFrame(Weight_Book_Mkt)
@@ -217,11 +217,11 @@ for i in range(0,len(betas)):
     Weight_Betas.iloc[i,:] = np.where(Rank_Betas.iloc[i,:]>=max5,0.2,(np.where(Rank_Betas.iloc[i,:]<=min5,-0.2,0)))
     
 #Market_Cap-weighted
-Weight_VW_Vol = np.ones((len(betas),len(industries)))
-Weight_VW_Book_Mkt = np.ones((len(betas),len(industries)))
-Weight_VW_Mkt_cap = np.ones((len(betas),len(industries)))
-Weight_VW_Momemtum = np.ones((len(betas),len(industries)))
-Weight_VW_Betas = np.ones((len(betas),len(industries)))
+Weight_VW_Vol = np.zeros((len(betas),len(industries)))
+Weight_VW_Book_Mkt = np.zeros((len(betas),len(industries)))
+Weight_VW_Mkt_cap = np.zeros((len(betas),len(industries)))
+Weight_VW_Momemtum = np.zeros((len(betas),len(industries)))
+Weight_VW_Betas = np.zeros((len(betas),len(industries)))
 
 Weight_VW_Vol= pd.DataFrame(Weight_VW_Vol)
 Weight_VW_Book_Mkt= pd.DataFrame(Weight_VW_Book_Mkt)
@@ -298,3 +298,24 @@ for i in range(0,len(betas)):
     Weight_VW_Momemtum.iloc[i,:][Weight_VW_Momemtum.iloc[i,:]==1] = 0
     Weight_VW_Betas.iloc[i,:][Weight_VW_Betas.iloc[i,:]==1] = 0
 
+#Return calculations
+np.nansum(Weight_Betas.iloc[0,:]*df_Daily_Returns.iloc[0,:]/100)+1
+#Equal_Weighted
+Weights_EW = [Weight_Betas,Weight_Book_Mkt,Weight_Mkt_cap,Weight_Momemtum,Weight_Vol]
+Return_EW = np.zeros((len(Weight_Betas),5))
+Return_EW= pd.DataFrame(Return_EW)
+Return_EW.columns = ['Weight_Betas','Weight_Book_Mkt','Weight_Mkt_cap','Weight_Momentum','Weight_Vol']
+Return_EW.index = betas.index
+
+Return_Month = np.zeros((31,1))
+
+for k in range(0,5):
+    for i in range(0,len(Weight_Betas)):
+        d = Weights_EW[k].index[i]+dateutil.relativedelta.relativedelta(months=1)
+        d_Last12 = d - dateutil.relativedelta.relativedelta(months=1)
+        X = df_Daily_Returns[(df_Daily_Returns.index < d)&(df_Daily_Returns.index >= d_Last12)]
+        for j in range(0,len(X)):
+            Return_Month[j] = np.nansum(Weights_EW[k].iloc[i,:]*X.iloc[j,:]/100)
+        Return_EW.iloc[i,k] = sum(Return_Month)
+
+print(sum(Return_EW.iloc[:,0])+1,sum(Return_EW.iloc[:,1])+1,sum(Return_EW.iloc[:,2])+1,sum(Return_EW.iloc[:,3])+1,sum(Return_EW.iloc[:,4])+1,)
