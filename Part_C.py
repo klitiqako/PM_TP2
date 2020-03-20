@@ -317,5 +317,3 @@ for k in range(0,5):
         for j in range(0,len(X)):
             Return_Month[j] = np.nansum(Weights_EW[k].iloc[i,:]*X.iloc[j,:]/100)
         Return_EW.iloc[i,k] = sum(Return_Month)
-
-print(sum(Return_EW.iloc[:,0])+1,sum(Return_EW.iloc[:,1])+1,sum(Return_EW.iloc[:,2])+1,sum(Return_EW.iloc[:,3])+1,sum(Return_EW.iloc[:,4])+1,)
