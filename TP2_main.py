@@ -43,13 +43,13 @@ working_num_firms=all_num_firms.loc[date_vec[idx]:date_vec[idx+59],:]
 num_firms = working_num_firms.iloc[-1]
 
 #1) the portfolio that maximizes the Sharpe ratio without short-sale constraints
-(tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns, [5], rf, risk_free_allowed = False, tangency = True)
+(tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns, 5, rf[0], risk_free_allowed = False, tangency = True)
 myvar.P1_weights = tmp3
 myvar.P1_return.append(myf.prtf_return(myvar.P1_weights,working_monthly_returns.iloc[-1]))
 
 
 #2) the portfolio that maximizes the Sharpe ratio with short-sale constraints;
-(tmp1, tmp2, tmp3) = myf.minvarpf_noshortsale(working_monthly_returns, [], rf, risk_free_allowed = False, tangency = True)
+(tmp1, tmp2, tmp3) = myf.minvarpf_noshortsale(working_monthly_returns, [], rf[0], risk_free_allowed = False, tangency = True)
 myvar.P2_weights = tmp3
 myvar.P2_return.append(myf.prtf_return(myvar.P2_weights,working_monthly_returns.iloc[-1]))
 
@@ -90,7 +90,7 @@ myvar.P6_return.append(myf.prtf_return(myvar.P6_weights,working_monthly_returns.
 
 
 #7) the portfolio with the minimum variance;
-(tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns,[], rf, risk_free_allowed = False, tangency = False)
+(tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns,[], rf[0], risk_free_allowed = False, tangency = False)
 myvar.P7_weights = tmp3
 myvar.P7_return.append(myf.prtf_return(myvar.P7_weights,working_monthly_returns.iloc[-1]))
 
