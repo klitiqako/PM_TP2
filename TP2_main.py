@@ -105,8 +105,8 @@ P6_return.append(myf.prtf_return(P6_weights,all_monthly_returns.loc[date_vec[idx
 P7_weights = tmp3
 P7_return.append(myf.prtf_return(P7_weights,all_monthly_returns.loc[date_vec[idx+60],:]))
 
-Table_weights=[P1_weights, P2_weights, P3_weights, P4_weights, P5_weights, P6_weights, P7_weights]
-Table_ret=[P1_return, P2_return, P3_return, P4_return, P5_return, P6_return, P7_return]
+Table_weights=np.array([P1_weights, P2_weights, P3_weights, P4_weights, P5_weights, P6_weights, P7_weights])
+Table_ret=np.array([P1_return, P2_return, P3_return, P4_return, P5_return, P6_return, P7_return])
 
 print(Table_weights)
 print(Table_ret)
