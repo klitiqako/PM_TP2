@@ -33,74 +33,99 @@ def constraint_on_short_sell(weights):
     return weights
 
 
-def minvarpf(x, mu, risk_free_rate = 0., risk_free_allowed = False , tangency = False):
-#Description: Function that compute the min var portfolio for a given E[R]
+def minvarpf(x, mu = None, risk_free_rate = 0., risk_free_allowed = False , tangency = False, minvar = False):
+#Description: Function that compute the min var portfolio for a given E[R] with no shortsale constraint using analytical formulas
 
     #Input:
     ## x : Matrix [T x N] Matrix of returns of N assets for time T
+    ## mu: Desired expected return. Set mu = none for the max sharpe ratio PF
     ## risk_free_rate: Scalar Riskfree rate
     ## tangency: Boolean Compute the tangency portfolio if true
-    ## short: Boolean True if short is allowed
-
-    #Analytical solution!
+    ## minvar: Portfolio with the lowest variance regardless the expected return
+    
+    #Output:
+    ## wieght : [N + 1] Vector of weight of each asset where the first element is the weight in the rf
+    ## standard deviation: Standard deviation of the portfolio
+    ## expected return: Expected return
+    
+    #Computation of all parameters
+    x = np.array(x)
     covariance_matrix = np.cov(x, rowvar = False)
     E_ret = np.mean(x,0)
-    nb_ind = np.size(covariance_matrix,1)
+    risk_free_rate = np.array(risk_free_rate)
+    tmp, nb_ind = covariance_matrix.shape
     covariance_matrixinv = np.linalg.inv(covariance_matrix)
     one_vec = np.ones(nb_ind)
     A = np.dot(np.dot(one_vec, covariance_matrixinv), np.ones(nb_ind))
-    C = np.dot(np.dot(E_ret, covariance_matrixinv),E_ret)
-    B = np.dot(np.dot(one_vec, covariance_matrixinv), E_ret)
-    
-    
-    if mu == []:
-        weight = covariance_matrixinv @ one_vec / (one_vec @ covariance_matrixinv @ one_vec)
-        min_var = weight @ covariance_matrix @ weight
-        mu = weight @ E_ret
-        return(mu, np.sqrt(min_var), weight)
-    else:
-        
-    
-        if tangency == False:
-            if risk_free_allowed == False:
-                    # Analitical solution
-                    Delta = A * C - B ** 2
-                    lmbda = (C - mu * B) / Delta
-                    gma = (mu * A - B) / Delta
-                    min_var = (A *( mu ** 2)- 2 * B * mu + C) / Delta
-                    weight = lmbda * np.dot(covariance_matrixinv,one_vec) + gma * np.dot(covariance_matrixinv, E_ret)
-                    wrf = np.array([0.])
-                    weight = np.concatenate((wrf,weight))                
-            else:
-                    gma = (mu - risk_free_rate) / (C - 2 * risk_free_rate * B + risk_free_rate ** 2 * A)
-                    min_var = (mu - risk_free_rate) ** 2 / (C - 2 * risk_free_rate * B + risk_free_rate ** 2 * A)
-                    weight = gma * np.dot(covariance_matrixinv, E_ret - risk_free_rate * one_vec)
-                    wrf = np.array([1 - np.dot(one_vec, weight)])
-                    weight = np.concatenate((wrf,weight))
-             
-                
-            return(mu, np.sqrt(min_var), weight)
-            
+    C = E_ret @ covariance_matrixinv @ E_ret
+    B = one_vec @ covariance_matrixinv @ E_ret  
+    if risk_free_allowed == False:
+        if tangency == True:
+            weight = covariance_matrixinv @ one_vec / (one_vec @ covariance_matrixinv @ one_vec)
+            min_var = weight @ covariance_matrix @ weight
+            mu = weight @ E_ret
+            wrf = np.array([0.])
+        elif minvar == True:
+            mu = B / A
+            Delta = A * C - B ** 2
+            lmbda = (C - mu * B) / Delta
+            gma = (mu * A - B) / Delta
+            min_var = (A *( mu ** 2)- 2 * B * mu + C) / Delta
+            weight = lmbda * np.dot(covariance_matrixinv,one_vec) + gma * np.dot(covariance_matrixinv, E_ret)
+            wrf = np.array([0.])
         else:
-       
-            weight = np.dot(covariance_matrixinv, E_ret - risk_free_rate * one_vec) / B - risk_free_rate * A
+            Delta = A * C - B ** 2
+            lmbda = (C - mu * B) / Delta
+            gma = (mu * A - B) / Delta
+            min_var = (A *( mu ** 2)- 2 * B * mu + C) / Delta
+            weight = lmbda * np.dot(covariance_matrixinv,one_vec) + gma * np.dot(covariance_matrixinv, E_ret)
+            wrf = np.array([0.])
+    else:
+        if tangency == True:
+                
+            weight = (covariance_matrixinv @ (E_ret - risk_free_rate * one_vec)) / (B - risk_free_rate * A)
             mu = (C - B * risk_free_rate) / (B - A * risk_free_rate)
             min_var = (C - 2 * risk_free_rate * B + risk_free_rate ** 2 * A) / (B - A * risk_free_rate) ** 2
-            return(mu, np.sqrt(min_var), weight)
+            wrf = np.array([0.])
+
+        elif minvar == True:
+            weight = np.zeros(nb_ind)
+            wrf = np.array([1.])
+            mu = risk_free_rate
+            min_var = 0
+        else:
+            gma = (mu - risk_free_rate) / (C - 2 * risk_free_rate * B + risk_free_rate ** 2 * A)
+            min_var = (mu - risk_free_rate) ** 2 / (C - 2 * risk_free_rate * B + risk_free_rate ** 2 * A)
+            weight = gma * np.dot(covariance_matrixinv, E_ret - risk_free_rate * one_vec)
+            wrf = np.array([1 - np.dot(one_vec, weight)])
+
+    weight = np.concatenate((wrf,weight))  
+    return(mu, np.sqrt(min_var), weight)
 
         
         
         
 def minvarpf_noshortsale(x, mu, risk_free_rate = 0., risk_free_allowed = False, tangency = False):
+    #Description: Function that compute the min var portfolio for a given E[R] with shortsale constraint using optimization methods
+
+    #Input:
+    ## x : Matrix [T x N] Matrix of returns of N assets for time T
+    ## mu: Desired expected return. Set mu = none for the max sharpe ratio PF
+    ## risk_free_rate: Scalar Riskfree rate
+    ## tangency: Boolean Compute the tangency portfolio if true
+    
+    #Output:
+    ## wieght : [N + 1] Vector of weight of each asset where the first element is the weight in the rf
+    ## standard deviation: Standard deviation of the portfolio
+    ## expected return: Expected return
+    
     
     if tangency == False:
         if risk_free_allowed == False:
             covariance_matrix = np.cov(x, rowvar = False)
             expected_return = np.mean(x,0)
             nb_ind = np.size(covariance_matrix,1)
-            initial_weights = np.repeat((1 / nb_ind), nb_ind)
-            
-            
+            initial_weights = np.repeat((1 / nb_ind), nb_ind) 
             ## ----- Because of difference between descrete and continous we need to find min(Var) ----- ##
             ## ----- Reframing the constraints for optimization ----- ##
             constraint_weights = {'type': 'eq', 'fun': constraint_on_weights}
@@ -108,20 +133,13 @@ def minvarpf_noshortsale(x, mu, risk_free_rate = 0., risk_free_allowed = False, 
                                       'fun': constraint_on_expected_return, 
                                       'args':(expected_return, mu,)}
             constraint_short_sell = {'type': 'ineq', 'fun': constraint_on_short_sell}
-            
-            
             constraints = [constraint_weights, constraint_expected_return, constraint_short_sell]
             tmp = minimize(objective, initial_weights, args=(covariance_matrix), 
                            method="SLSQP", constraints=constraints)
             min_var = tmp.fun
             weight = tmp.x
             wrf = np.array([0.])
-            weight = np.concatenate((wrf,weight))
-            
-            
-             
-            return(mu, np.sqrt(min_var), weight)
-            
+            weight = np.concatenate((wrf,weight))        
         else:
             y = x.copy()
             y.insert(0, "Risk free", risk_free_rate)
@@ -129,8 +147,6 @@ def minvarpf_noshortsale(x, mu, risk_free_rate = 0., risk_free_allowed = False, 
             expected_return = np.mean(y,0)
             nb_ind = np.size(covariance_matrix,1)
             initial_weights = np.repeat((1 / nb_ind), nb_ind)
-            
-            
             ## ----- Because of difference between descrete and continous we need to find min(Var) ----- ##
             ## ----- Reframing the constraints for optimization ----- ##
             constraint_weights = {'type': 'eq', 'fun': constraint_on_weights}
@@ -138,16 +154,12 @@ def minvarpf_noshortsale(x, mu, risk_free_rate = 0., risk_free_allowed = False, 
                                       'fun': constraint_on_expected_return, 
                                       'args':(expected_return, mu,)}
             constraint_short_sell = {'type': 'ineq', 'fun': constraint_on_short_sell}
-            
-            
             constraints = [constraint_weights, constraint_expected_return,
                        constraint_short_sell]
             tmp = minimize(objective, initial_weights, args=(covariance_matrix), 
                            method="SLSQP", constraints=constraints)
             min_var = tmp.fun
-            weight = tmp.x     
-            
-        return(mu, np.sqrt(min_var), weight)
+            weight = tmp.x          
     else:
         
         covariance_matrix = np.cov(x, rowvar = False)
@@ -157,18 +169,16 @@ def minvarpf_noshortsale(x, mu, risk_free_rate = 0., risk_free_allowed = False, 
         ## ----- Reframing the constraints for optimization ----- ##
         constraint_weights = {'type': 'eq', 'fun': constraint_on_weights}
         constraint_short_sell = {'type': 'ineq', 'fun': constraint_on_short_sell}
-
-   
         constraints = [constraint_weights, constraint_short_sell]
-
-        
         tmp = minimize(tangency_objective, initial_weights, 
                                      args=(risk_free_rate, covariance_matrix, expected_return), 
                                      method="SLSQP", constraints=constraints)
         weight = tmp.x
-        min_var = np.sqrt((weight.dot(covariance_matrix)).dot(weight))
+        min_var = (weight.dot(covariance_matrix)).dot(weight)
         mu = weight.dot(expected_return)
-        return(mu, min_var, weight)
+        wrf = np.array([0.])
+        weight = np.concatenate((wrf,weight))
+    return(mu, np.sqrt(min_var), weight)
 
 
 
@@ -238,8 +248,8 @@ def f_MAXSR(MyInput, n_sim, d):
     return([x[: , i + 1], -SR[i + 1]])
         
         
-def prtf_return(weights,industry_returns):
-    gross_ret = 1+(industry_returns)/100
+def prtf_return(weights, industry_returns):
+    gross_ret = 1 + (industry_returns)/100
     ret = weights @ (gross_ret - 1 ) * 100
     return(ret)
         
