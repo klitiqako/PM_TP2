@@ -65,45 +65,45 @@ portfolio_sharpe_ratio = []             # 7 x 1
 #1) the portfolio that maximizes the Sharpe ratio without short-sale constraints
 (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns, 5, rf[0], risk_free_allowed = False, tangency = True)
 P1_weights = tmp3
-P1_return.append(myf.prtf_return(P1_weights,working_monthly_returns.iloc[-1]))
+P1_return.append(myf.prtf_return(P1_weights,all_monthly_returns.loc[date_vec[idx+60],:]))
 
 
 #2) the portfolio that maximizes the Sharpe ratio with short-sale constraints;
 (tmp1, tmp2, tmp3) = myf.minvarpf_noshortsale(working_monthly_returns, 5, rf[0], risk_free_allowed = False, tangency = True)
 P2_weights = tmp3
-P2_return.append(myf.prtf_return(P2_weights,working_monthly_returns.iloc[-1]))
+P2_return.append(myf.prtf_return(P2_weights,all_monthly_returns.loc[date_vec[idx+60],:]))
 
 
 #3) the portfolio where the weight of each asset is inversely related to its variance;
 P3_weights = 1/np.diag(covariance_matrix)
 Inv_variance =  sum(P3_weights)              
 P3_weights = P3_weights/Inv_variance
-P3_return.append(myf.prtf_return(P3_weights,working_monthly_returns.iloc[-1]))
+P3_return.append(myf.prtf_return(P3_weights,all_monthly_returns.loc[date_vec[idx+60],:]))
 
 
 #4) the portfolio where the weight of each asset is inversely related to its volatility;
 P4_weights = 1/np.diag(np.sqrt(covariance_matrix))
 Inv_volatility =  sum(P4_weights)
 P4_weights = P4_weights/Inv_volatility
-P4_return.append(myf.prtf_return(P4_weights,working_monthly_returns.iloc[-1]))
+P4_return.append(myf.prtf_return(P4_weights,all_monthly_returns.loc[date_vec[idx+60],:]))
 
 
 #5) the portfolio where assets have the same weight;
 P5_weights = np.full([n_industries],1/n_industries)
-P5_return.append(myf.prtf_return(P5_weights,working_monthly_returns.iloc[-1]))
+P5_return.append(myf.prtf_return(P5_weights,all_monthly_returns.loc[date_vec[idx+60],:]))
 
 
 #6) the portfolio where the weight of each is linearly related to its market capitalization;
 total_market_cap = avg_firm_size @ num_firms
 P6_weights = (avg_firm_size * num_firms) / total_market_cap
 P6_weights=P6_weights.to_numpy()
-P6_return.append(myf.prtf_return(P6_weights,working_monthly_returns.iloc[-1]))
+P6_return.append(myf.prtf_return(P6_weights,all_monthly_returns.loc[date_vec[idx+60],:]))
 
 
 #7) the portfolio with the minimum variance;
 (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns,[], rf[0], risk_free_allowed = False, tangency = False)
 P7_weights = tmp3
-P7_return.append(myf.prtf_return(P7_weights,working_monthly_returns.iloc[-1]))
+P7_return.append(myf.prtf_return(P7_weights,all_monthly_returns.loc[date_vec[idx+60],:]))
 
 Table_weights=[P1_weights, P2_weights, P3_weights, P4_weights, P5_weights, P6_weights, P7_weights]
 Table_ret=[P1_return, P2_return, P3_return, P4_return, P5_return, P6_return, P7_return]
