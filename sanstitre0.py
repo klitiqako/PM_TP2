@@ -20,18 +20,18 @@ for idx in range(10):
     working_monthly_returns = all_monthly_returns.iloc[idx:idx+59,:]
     
     
-    mu_scale = np.arange(start = -0.5 , stop = 0.2, step = 0.001)
+    mu_scale = np.arange(start = 0  , stop = 0.015, step = 0.0005)
     var_tmp= []
     var_tmp2 = []
     for mu in  mu_scale:
-        (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns, mu, rf, risk_free_allowed = False, tangency = False)
+        (tmp1, tmp2, tmp3) = myf.minvarpf_noshortsale(working_monthly_returns, mu, rf, risk_free_allowed = False, tangency = False)
         var_tmp.append(tmp2)
         
-        (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns, mu, rf, risk_free_allowed = True, tangency = False)
+        (tmp1, tmp2, tmp3) = myf.minvarpf_noshortsale(working_monthly_returns, mu, rf, risk_free_allowed = True, tangency = False)
         var_tmp2.append(tmp2)
     plt.plot(var_tmp, mu_scale)  
     plt.plot(var_tmp2, mu_scale)  
-    (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns,mu, rf, risk_free_allowed = True, tangency = True)
+    (tmp1, tmp2, tmp3) = myf.minvarpf_noshortsale(working_monthly_returns,mu, rf, risk_free_allowed = True, tangency = True)
     plt.scatter(tmp2, tmp1)
     
     

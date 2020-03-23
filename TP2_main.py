@@ -74,58 +74,60 @@ for date in date_vec_btst:
     num_firms = working_num_firms.iloc[-1]
     
     #1) the portfolio that maximizes the Sharpe ratio without short-sale constraints
-    (tmp1, tmp2, tmp3) = myf.minvarpf(x = working_monthly_returns, mu = None, risk_free_rate = rf, risk_free_allowed = True, tangency = True)
-    P1_weights.append(tmp3[1:])
-    P1_return.append(myf.prtf_return(P1_weights[-1], montly_returns_tplus1))
-    #print(myf.prtf_return(P1_weights[-1], montly_returns_tplus1))
+    (tmp1, tmp2, tmp3) = myf.minvarpf(x = working_monthly_returns, mu = None, risk_free_rate = rf, 
+                                      risk_free_allowed = True, tangency = True, minvar = True)
+    P1_weights.append(tmp3)
+    P1_return.append(myf.prtf_return(P1_weights[-1], montly_returns_tplus1, rf))
+    
     
     #2) the portfolio that maximizes the Sharpe ratio with short-sale constraints;
     (tmp1, tmp2, tmp3) = myf.minvarpf_noshortsale(working_monthly_returns, [], rf, risk_free_allowed = True, tangency = True)
-    P2_weights = tmp3[1:]
-    P2_return.append(myf.prtf_return(P2_weights, montly_returns_tplus1))
+    P2_weights = tmp3
+    P2_return.append(myf.prtf_return(P2_weights, montly_returns_tplus1, rf))
+   
     
     #3) the portfolio where the weight of each asset is inversely related to its variance;
     Inv_variance =  sum(1/np.diag(covariance_matrix))
-    P3_weights = [
+    P3_weights = [ 0,
                         1/covariance_matrix.iloc[0,0], 1/covariance_matrix.iloc[1,1], 1/covariance_matrix.iloc[2,2],
                         1/covariance_matrix.iloc[3,3], 1/covariance_matrix.iloc[4,4], 1/covariance_matrix.iloc[5,5],
                         1/covariance_matrix.iloc[6,6], 1/covariance_matrix.iloc[7,7], 1/covariance_matrix.iloc[8,8],
                         1/covariance_matrix.iloc[9,9],
                         ]
     P3_weights = P3_weights/Inv_variance
-    P3_return.append(myf.prtf_return(P3_weights, montly_returns_tplus1))
+    P3_return.append(myf.prtf_return(P3_weights, montly_returns_tplus1, rf))
     
     
     #4) the portfolio where the weight of each asset is inversely related to its volatility;
     Inv_volatility =  sum(1/np.diag(np.sqrt(covariance_matrix)))
-    P4_weights = [
+    P4_weights = [ 0,
                         1/covariance_matrix.iloc[0,0], 1/covariance_matrix.iloc[1,1], 1/covariance_matrix.iloc[2,2],
                         1/covariance_matrix.iloc[3,3], 1/covariance_matrix.iloc[4,4], 1/covariance_matrix.iloc[5,5],
                         1/covariance_matrix.iloc[6,6], 1/covariance_matrix.iloc[7,7], 1/covariance_matrix.iloc[8,8],
                         1/covariance_matrix.iloc[9,9],
                         ]
     P4_weights = np.sqrt(P4_weights)/Inv_volatility
-    P4_return.append(myf.prtf_return(P4_weights, montly_returns_tplus1))
+    P4_return.append(myf.prtf_return(P4_weights, montly_returns_tplus1, rf))
     
     
     #5) the portfolio where assets have the same weight;
-    P5_weights = np.full((1,n_industries),1/n_industries)
-    P5_return.append(myf.prtf_return(P5_weights, montly_returns_tplus1))
+    P5_weights = np.append(0, np.repeat(1/n_industries, n_industries))
+    P5_return.append(myf.prtf_return(P5_weights, montly_returns_tplus1, rf))
     
     
     #6) the portfolio where the weight of each is linearly related to its market capitalization;
     total_market_cap = avg_firm_size @ num_firms
-    P6_weights = (avg_firm_size * num_firms) / total_market_cap
-    P6_return.append(myf.prtf_return(P6_weights, montly_returns_tplus1))
+    P6_weights = np.append(0, np.array((avg_firm_size * num_firms) / total_market_cap))
+    P6_return.append(myf.prtf_return(P6_weights, montly_returns_tplus1, rf))
     
     
     #7) the portfolio with the minimum variance;
     (tmp1, tmp2, tmp3) = myf.minvarpf(x = working_monthly_returns, risk_free_rate = rf, risk_free_allowed = False, tangency = False, minvar = True)
-    P7_weights = tmp3[1:]
-    P7_return.append(myf.prtf_return(P7_weights, montly_returns_tplus1))
+    P7_weights = tmp3
+    P7_return.append(myf.prtf_return(P7_weights, montly_returns_tplus1, rf))
 
 
-NAV_P1_return = np.cumprod(1+ (np.array(P1_return)))
+NAV_P1_return = np.cumprod(1+ np.array(P1_return))
 NAV_P2_return = np.cumprod(1+ np.array(P2_return))
 NAV_P3_return = np.cumprod(1+ np.array(P3_return))
 NAV_P4_return = np.cumprod(1+ np.array(P4_return))
@@ -140,3 +142,5 @@ plt.xlabel(date_vec_btst)
 
 P1_weight_np = np.array(P1_weights)
 plt.plot(P1_weight_np[:10,:])
+
+

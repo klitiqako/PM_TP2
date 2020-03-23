@@ -4,6 +4,7 @@ Created on Fri Jan 17 22:52:32 2020
 @author: Keanu Vivish
 """
 import numpy as np
+import pandas as pd
 import random
 from scipy.optimize import minimize
 
@@ -81,13 +82,15 @@ def minvarpf(x, mu = None, risk_free_rate = 0., risk_free_allowed = False , tang
             weight = lmbda * np.dot(covariance_matrixinv,one_vec) + gma * np.dot(covariance_matrixinv, E_ret)
             wrf = np.array([0.])
     else:
-        if tangency == True:
-                
+        if tangency == True and B / A > risk_free_rate:
+
             weight = (covariance_matrixinv @ (E_ret - risk_free_rate * one_vec)) / (B - risk_free_rate * A)
             mu = (C - B * risk_free_rate) / (B - A * risk_free_rate)
             min_var = (C - 2 * risk_free_rate * B + risk_free_rate ** 2 * A) / (B - A * risk_free_rate) ** 2
             wrf = np.array([0.])
 
+                    
+            
         elif minvar == True:
             weight = np.zeros(nb_ind)
             wrf = np.array([1.])
@@ -248,9 +251,9 @@ def f_MAXSR(MyInput, n_sim, d):
     return([x[: , i + 1], -SR[i + 1]])
         
         
-def prtf_return(weights, industry_returns):
-    gross_ret = 1 + (industry_returns)/100
-    ret = weights @ (gross_ret - 1 ) * 100
+def prtf_return(weights, industry_returns, rf):
+    gross_ret = 1 + pd.concat([rf , industry_returns])
+    ret = weights @ (gross_ret - 1 )
     return(ret)
         
         
