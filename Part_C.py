@@ -72,18 +72,20 @@ Book_to_Mkt_C = np.zeros((len(df_Returns),len(industries)))
 Book_to_Mkt_C= pd.DataFrame(Book_to_Mkt_C)
 Book_to_Mkt_C.index = df_Returns.index
 Book_to_Mkt_C.columns = industries
+
+
 for i in range(0,len(Book_to_Mkt_C)):
-    for j in range(0,len(industries)):
-        if Book_to_Mkt_C.index[i].year == df_MktBook.index[0].year:
-            B_M_1 = df_MktBook[df_MktBook.index.year == Book_to_Mkt_C.index[i].year].iloc[0,j]
-            Book_to_Mkt_C.iloc[i,j] = B_M_1
-        elif Book_to_Mkt_C.index[i].month <= 6:
-            B_M_2 = df_MktBook[df_MktBook.index.year == Book_to_Mkt_C.index[i].year-1].iloc[0,j]
-            Book_to_Mkt_C.iloc[i,j] = B_M_2
-        else:
-            B_M_3 = df_MktBook[df_MktBook.index.year == Book_to_Mkt_C.index[i].year].iloc[0,j]
-            Book_to_Mkt_C.iloc[i,j] = B_M_3
-            
+    #for j in range(0,len(industries)):
+    if Book_to_Mkt_C.index[i].year == df_MktBook.index[0].year:
+        B_M_1 = df_MktBook[df_MktBook.index.year == Book_to_Mkt_C.index[i].year]
+        Book_to_Mkt_C.iloc[i,:] = np.array(B_M_1)
+    elif Book_to_Mkt_C.index[i].month <= 6:
+        B_M_2 = df_MktBook[df_MktBook.index.year == Book_to_Mkt_C.index[i].year-1]
+        Book_to_Mkt_C.iloc[i,:] = np.array(B_M_2)
+    else:
+        B_M_3 = df_MktBook[df_MktBook.index.year == Book_to_Mkt_C.index[i].year]
+        Book_to_Mkt_C.iloc[i,:] = np.array(B_M_3)  
+         
 ###############Q2
 Months = df_Returns.index
 Months = Months.insert(1123,pd.to_datetime('20200201', format= '%Y%m%d'))
