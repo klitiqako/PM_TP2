@@ -91,7 +91,7 @@ for date in date_vec_btst:
     P2_return.append(myf.prtf_return(P2_weights,montly_returns_tplus1,:]))
 
 
-    #3) the portfolio where the weight of each asset is inversely related to its variance;
+     #3) the portfolio where the weight of each asset is inversely related to its variance;
     P3_weights = 1/np.diag(covariance_matrix)
     Inv_variance =  sum(P3_weights)              
     P3_weights = P3_weights/Inv_variance
