@@ -34,6 +34,10 @@ idx_start_2         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_2)
 idx_start_3         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_3)
 idx_end             = list(date_vec.strftime("%Y-%m-%d")).index(end_date)
 date_vec_btst       = date_vec[idx_start_1:idx_end].strftime("%Y-%m-%d")
+date_vec_prd2       = date_vec[idx_start_2:idx_end].strftime("%Y-%m-%d")
+date_vec_prd3       = date_vec[idx_start_3:idx_end].strftime("%Y-%m-%d")
+idx2                = date_vec.get_loc(date_vec_prd2)
+idx3                = date_vec.get_loc(date_vec_prd3)
 
 # Initialization Empty vectors
 P1_weights          = []               # 10 x n
@@ -144,14 +148,30 @@ for date in date_vec_btst:
     P6_return.append(myf.prtf_return(P6_weights,montly_returns_tplus1))
     P6_alpha.append(P6_return[-1]-rf_tplus1)
 
-# Computing and comparing performance Sharp Ratios
+# Computing and comparing performance Sharpe Ratios
 P1_SR_OS1 = P1_alpha.mean() / np.sqrt(P1_alpha.var())
 P2_SR_OS1 = P2_alpha.mean() / np.sqrt(P2_alpha.var())
 P3_SR_OS1 = P3_alpha.mean() / np.sqrt(P3_alpha.var())
 P4_SR_OS1 = P4_alpha.mean() / np.sqrt(P4_alpha.var())
 P5_SR_OS1 = P5_alpha.mean() / np.sqrt(P5_alpha.var())
-P6_SR_OS1 = P6_alpha.mean() / np.sqrt(P6_alpha.var()
+P6_SR_OS1 = P6_alpha.mean() / np.sqrt(P6_alpha.var())
 P7_SR_OS1 = P7_alpha.mean() / np.sqrt(P7_alpha.var())
+
+P1_SR_OS2 = P1_alpha[idx2].mean() / np.sqrt(P1_alpha.var())
+P2_SR_OS2 = P2_alpha[idx2].mean() / np.sqrt(P2_alpha.var())
+P3_SR_OS2 = P3_alpha.mean() / np.sqrt(P3_alpha.var())
+P4_SR_OS2 = P4_alpha.mean() / np.sqrt(P4_alpha.var())
+P5_SR_OS2 = P5_alpha.mean() / np.sqrt(P5_alpha.var())
+P6_SR_OS2 = P6_alpha.mean() / np.sqrt(P6_alpha.var())
+P7_SR_OS2 = P7_alpha.mean() / np.sqrt(P7_alpha.var())
+
+P1_SR_OS3 = P1_alpha[idx3].mean() / np.sqrt(P1_alpha.var())
+P2_SR_OS3 = P2_alpha[idx3].mean() / np.sqrt(P2_alpha.var())
+P3_SR_OS3 = P3_alpha.mean() / np.sqrt(P3_alpha.var())
+P4_SR_OS3 = P4_alpha.mean() / np.sqrt(P4_alpha.var())
+P5_SR_OS3 = P5_alpha.mean() / np.sqrt(P5_alpha.var())
+P6_SR_OS3 = P6_alpha.mean() / np.sqrt(P6_alpha.var())
+P7_SR_OS3 = P7_alpha.mean() / np.sqrt(P7_alpha.var())
 
 
 # Computing compounded return for the period and Graph
@@ -171,18 +191,6 @@ plt.show()
 
 #P1_weight_np = np.array(P1_weights)
 #plt.plot(P1_weight_np[:10,:])
-
-# For Period 2
-date_vec_prd2       = date_vec[idx_start_2:idx_end].strftime("%Y-%m-%d")
-idx2                = date_vec.get_loc(date_vec_prd2)
-
-NAV_P1_return = np.cumprod(1+ np.array(P1_return) / 100)
-NAV_P2_return = np.cumprod(1+ np.array(P2_return) / 100)
-NAV_P3_return = np.cumprod(1+ np.array(P3_return) / 100)
-NAV_P4_return = np.cumprod(1+ np.array(P4_return) / 100)
-NAV_P5_return = np.cumprod(1+ np.array(P5_return) / 100)
-NAV_P6_return = np.cumprod(1+ np.array(P6_return) / 100)
-NAV_P7_return = np.cumprod(1+ np.array(P7_return) / 100)
 
 
 
