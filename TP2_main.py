@@ -79,19 +79,26 @@ for date in date_vec_btst:
     num_firms               = working_num_firms.iloc[-1]
 
 
+    #5) the portfolio where assets have the same weight;
+    P5_weights = np.full([n_industries],1/n_industries)
+    P5_return.append(myf.prtf_return(P5_weights,montly_returns_tplus1))
+
+
     #7) the portfolio with the minimum variance;
     (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns,[], rf[0], risk_free_allowed = False, tangency = False)
     P7_weights = tmp3
     P7_return.append(myf.prtf_return(P7_weights,montly_returns_tplus1))
 
     #1) the portfolio that maximizes the Sharpe ratio without short-sale constraints
-    if rf < P7_return.iloc[-1]:
+    if rf[0] < P7_return[-1]:
         (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns, 5, rf[0], risk_free_allowed = False, tangency = True)
         P1_weights = tmp3
         P1_return.append(myf.prtf_return(P1_weights,montly_returns_tplus1))
     else:
-        (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns, 5, rf[0], risk_free_allowed = False, tangency = True)
-        P1_weights = tmp3
+        constraint_weights = {'type': 'eq', 'fun': myf.constraint_on_weights}
+        tangency_constraints = [constraint_weights]
+        tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=tangency_constraints)
+        P1_weights = tmp.x
         P1_return.append(myf.prtf_return(P1_weights,montly_returns_tplus1))    
 
     #2) the portfolio that maximizes the Sharpe ratio with short-sale constraints;
@@ -114,16 +121,13 @@ for date in date_vec_btst:
     P4_return.append(myf.prtf_return(P4_weights,montly_returns_tplus1))
 
 
-    #5) the portfolio where assets have the same weight;
-    P5_weights = np.full([n_industries],1/n_industries)
-    P5_return.append(myf.prtf_return(P5_weights,montly_returns_tplus1))
-
-
     #6) the portfolio where the weight of each is linearly related to its market capitalization;
     total_market_cap = avg_firm_size @ num_firms
     P6_weights = (avg_firm_size * num_firms) / total_market_cap
     P6_weights=P6_weights.to_numpy()
     P6_return.append(myf.prtf_return(P6_weights,montly_returns_tplus1))
+
+# Computing and comparing performance
 
 NAV_P1_return = np.cumprod(1+ np.array(P1_return) / 100)
 NAV_P2_return = np.cumprod(1+ np.array(P2_return) / 100)
@@ -136,7 +140,7 @@ NAV_P7_return = np.cumprod(1+ np.array(P7_return) / 100)
 NAV = np.transpose([NAV_P1_return, NAV_P2_return, NAV_P3_return, NAV_P4_return, NAV_P5_return, NAV_P6_return, NAV_P7_return])
 plt.plot(NAV)
 #plt.yscale('log')
-plt.xlabel(date_vec_btst)
+#plt.xlabel(date_vec_btst)
 plt.show()
 
 #P1_weight_np = np.array(P1_weights)
