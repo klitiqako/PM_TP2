@@ -22,7 +22,7 @@ date_list = date_vec.tolist()
 all_risk_free_rates = read_data.read_1_data("TP2_monthly_risk_free.csv") / 100
 all_avg_firm_size = read_data.read_1_data("TP2_avg_firm_size.csv")
 all_num_firms = read_data.read_1_data("TP2_numb_of_firms.csv")
-
+risk_free_rate = all_risk_free_rates.iloc[:,-1]
 
 ## ---------- Part A ----------------------------------------------------------
 
@@ -125,22 +125,29 @@ for date in date_vec_btst:
     (tmp1, tmp2, tmp3) = myf.minvarpf(x = working_monthly_returns, risk_free_rate = rf, risk_free_allowed = False, tangency = False, minvar = True)
     P7_weights = tmp3
     P7_return.append(myf.prtf_return(P7_weights, montly_returns_tplus1, rf))
+P8_return = risk_free_rate.iloc[idx_start:idx_end]
 
 
-NAV_P1_return = np.cumprod(1+ np.array(P1_return))
-NAV_P2_return = np.cumprod(1+ np.array(P2_return))
-NAV_P3_return = np.cumprod(1+ np.array(P3_return))
-NAV_P4_return = np.cumprod(1+ np.array(P4_return))
-NAV_P5_return = np.cumprod(1+ np.array(P5_return))
-NAV_P6_return = np.cumprod(1+ np.array(P6_return))
-NAV_P7_return = np.cumprod(1+ np.array(P7_return))
+Returns = np.array([P1_return, P2_return, P3_return, P4_return, P5_return, P6_return, P7_return, P8_return])
+NAV = np.cumprod(1 + np.transpose(Returns), 0)
+strategies = ['Max Sharpe (long short)', 'Max Sharpe (Long only)', 'Inverse Var', 'Inverse S-d', 'Equally weighted', 'Mkt Cap weighted', 'Min Var', 'Risk_free']
 
-NAV = np.transpose([NAV_P1_return, NAV_P2_return, NAV_P3_return, NAV_P4_return, NAV_P5_return, NAV_P6_return, NAV_P7_return])
-plt.plot(NAV)
+for idx, strat in enumerate(strategies):
+    plt.plot(NAV[:,idx], label = strat)
 plt.yscale('log')
-plt.xlabel(date_vec_btst)
+plt.legend()
+plt.title('Value of 1 $ invested the '+ str(date_vec_btst[1]))
+plt.show()
 
-P1_weight_np = np.array(P1_weights)
-plt.plot(P1_weight_np[:10,:])
+# Performance measure
+
+n_year = (idx_end - idx_start) / 12
+
+for idx, strat in enumerate(strategies):
+    #annualize return (geometric mean)
+    returns
+    Sharpe_ratio.append(NAV[:,idx])
+
+(idx_end - idx_start) / 12
 
 
