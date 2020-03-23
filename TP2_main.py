@@ -173,18 +173,20 @@ P5_SR_OS3 = np.asarray(P5_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray
 P6_SR_OS3 = np.asarray(P6_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_start_3:idx_end]))
 P7_SR_OS3 = np.asarray(P7_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_start_3:idx_end]))
 
-Part_A_SR_table = pd.DataFrame([[P1_SR_OS1, P1_SR_OS2, P1_SR_OS3],\
-                                ...[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],\
-                                ...[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],\
-                                ...[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],\
-                                ...[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],\
-                                ...[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],\
-                                ...[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],\
-                                ...],columns=['SR for Jul 1931 Dec 2019',\
-                                            ...'SR for Jan 1990 Dec 2019',\
-                                            ...'SR for Jan 2000 Dec 2019'])
+Part_A_SR_table = pd.DataFrame(np.asarray([[P1_SR_OS1, P1_SR_OS2, P1_SR_OS3],...
+[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],...
+[P3_SR_OS1, P3_SR_OS2, P3_SR_OS3],...
+[P4_SR_OS1, P4_SR_OS2, P4_SR_OS3],...
+[P5_SR_OS1, P5_SR_OS2, P5_SR_OS3],...
+[P6_SR_OS1, P6_SR_OS2, P6_SR_OS3],...
+[P7_SR_OS1, P7_SR_OS2, P7_SR_OS3],...
+]),columns=['a','b','c'])
+                                    
+                                            #'SR for Jul 1931 Dec 2019',\
+                                            #...'SR for Jan 1990 Dec 2019',\
+                                            #...'SR for Jan 2000 Dec 2019'])
 
-print(portfolio_sharpe_ratio)
+print(Part_A_SR_table)
 
 # Computing compounded return for the period and Graph
 NAV_P1_return = np.cumprod(1+ np.array(P1_return) / 100)
