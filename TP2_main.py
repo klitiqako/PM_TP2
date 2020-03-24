@@ -29,9 +29,10 @@ start_date_2        = "1990-01-01"
 start_date_3        = "2000-01-01"
 end_date            = "2020-01-01"
 
-start_date_2        = "1934-01-01"
-start_date_3        = "1936-01-01"
-end_date            = "1938-01-01"
+# To test shorter period
+#start_date_2        = "1934-01-01"
+#start_date_3        = "1936-01-01"
+#end_date            = "1938-01-01"
 
 rolling_window      = 60 # Number of weeks in period used for estimation 5 years
 idx_start_1         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_1)
@@ -178,19 +179,13 @@ P5_SR_OS3 = np.asarray(P5_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np
 P6_SR_OS3 = np.asarray(P6_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_end-idx_start_3:idx_end]))
 P7_SR_OS3 = np.asarray(P7_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_end-idx_start_3:idx_end]))
 
-test_array = [[P1_SR_OS1, P1_SR_OS2, P1_SR_OS3],[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],...
-[P3_SR_OS1, P3_SR_OS2, P3_SR_OS3],[P4_SR_OS1, P4_SR_OS2, P4_SR_OS3],...
-[P5_SR_OS1, P5_SR_OS2, P5_SR_OS3],[P6_SR_OS1, P6_SR_OS2, P6_SR_OS3],[P7_SR_OS1, P7_SR_OS2, P7_SR_OS3]]
+test_array = [[P1_SR_OS1, P1_SR_OS2, P1_SR_OS3],[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],[P3_SR_OS1, P3_SR_OS2, P3_SR_OS3],[P4_SR_OS1, P4_SR_OS2, P4_SR_OS3],[P5_SR_OS1, P5_SR_OS2, P5_SR_OS3],[P6_SR_OS1, P6_SR_OS2, P6_SR_OS3],[P7_SR_OS1, P7_SR_OS2, P7_SR_OS3]]
 
-Part_A_SR_table = pd.DataFrame(np.asarray(test_array),columns=['a','b','c'])
+Part_A_SR_table = pd.DataFrame(np.asarray(test_array),columns=['SR for Jul 1931-Dec 2019','SR for Jan 1990-Dec 2019','SR for Jan 2000-Dec 2019'])
                                     
-                                            #'SR for Jul 1931 Dec 2019',\
-                                            #...'SR for Jan 1990 Dec 2019',\
-                                            #...'SR for Jan 2000 Dec 2019'])
-
 print(Part_A_SR_table)
 
-# Computing compounded return for the period and Graph
+# Computing compounded return for the 1st period and Graph
 NAV_P1_return = np.cumprod(1+ np.array(P1_return) / 100)
 NAV_P2_return = np.cumprod(1+ np.array(P2_return) / 100)
 NAV_P3_return = np.cumprod(1+ np.array(P3_return) / 100)
@@ -205,13 +200,42 @@ plt.plot(NAV)
 #plt.xlabel(date_vec_btst)
 plt.show()
 
-#P1_weight_np = np.array(P1_weights)
-#plt.plot(P1_weight_np[:10,:])
+# Computing compounded return for the 2nd period and Graph
+NAV_P1_return_OS2 = np.cumprod(1+ np.array(P1_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P2_return_OS2 = np.cumprod(1+ np.array(P2_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P3_return_OS2 = np.cumprod(1+ np.array(P3_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P4_return_OS2 = np.cumprod(1+ np.array(P4_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P5_return_OS2 = np.cumprod(1+ np.array(P5_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P6_return_OS2 = np.cumprod(1+ np.array(P6_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P7_return_OS2 = np.cumprod(1+ np.array(P7_return[idx_end-idx_start_2:idx_end]) / 100)
+
+NAV_OS2 = np.transpose([NAV_P1_return_OS2, NAV_P2_return_OS2, NAV_P3_return_OS2, NAV_P4_return_OS2, NAV_P5_return_OS2, NAV_P6_return_OS2, NAV_P7_return_OS2])
+plt.plot(NAV_OS2)
+#plt.yscale('log')
+#plt.xlabel(date_vec_btst)
+plt.show()
+
+# Computing compounded return for the 3rd period and Graph
+NAV_P1_return_OS3 = np.cumprod(1+ np.array(P1_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P2_return_OS3 = np.cumprod(1+ np.array(P2_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P3_return_OS3 = np.cumprod(1+ np.array(P3_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P4_return_OS3 = np.cumprod(1+ np.array(P4_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P5_return_OS3 = np.cumprod(1+ np.array(P5_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P6_return_OS3 = np.cumprod(1+ np.array(P6_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P7_return_OS3 = np.cumprod(1+ np.array(P7_return[idx_end-idx_start_3:idx_end]) / 100)
+
+NAV_OS3 = np.transpose([NAV_P1_return_OS3, NAV_P2_return_OS3, NAV_P3_return_OS3, NAV_P4_return_OS3, NAV_P5_return_OS3, NAV_P6_return_OS3, NAV_P7_return_OS3])
+plt.plot(NAV_OS3)
+#plt.yscale('log')
+#plt.xlabel(date_vec_btst)
+plt.show()
+
+## ---------- Part B ----------------------------------------------------------
 
 
 
-Table_weights=np.array([P1_weights, P2_weights, P3_weights, P4_weights, P5_weights, P6_weights, P7_weights])
-Table_ret=np.array([P1_return, P2_return, P3_return, P4_return, P5_return, P6_return, P7_return])
 
-print(Table_weights)
-print(Table_ret)
+
+
+
+
