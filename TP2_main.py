@@ -28,6 +28,11 @@ start_date_1        = "1931-07-01"
 start_date_2        = "1990-01-01"
 start_date_3        = "2000-01-01"
 end_date            = "2020-01-01"
+
+start_date_2        = "1934-01-01"
+start_date_3        = "1936-01-01"
+end_date            = "1938-01-01"
+
 rolling_window      = 60 # Number of weeks in period used for estimation 5 years
 idx_start_1         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_1)
 idx_start_2         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_2)
@@ -94,14 +99,14 @@ for date in date_vec_btst:
     #5) the portfolio where assets have the same weight;
     P5_weights = np.full([n_industries],1/n_industries)
     P5_return.append(myf.prtf_return(P5_weights,montly_returns_tplus1))
-    P5_alpha.append(P5_return[-1]-rf_tplus1)
+    P5_alpha.append(P5_return[-1]-rf_tplus1[0])
 
 
     #7) the portfolio with the minimum variance;
     (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns,[], rf[0], risk_free_allowed = False, tangency = False)
     P7_weights = tmp3
     P7_return.append(myf.prtf_return(P7_weights,montly_returns_tplus1))
-    P7_alpha.append(P7_return[-1]-rf_tplus1)
+    P7_alpha.append(P7_return[-1]-rf_tplus1[0])
 
 
     #1) the portfolio that maximizes the Sharpe ratio without short-sale constraints
@@ -115,14 +120,14 @@ for date in date_vec_btst:
     tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=tangency_constraints)
     P1_weights = tmp.x
     P1_return.append(myf.prtf_return(P1_weights,montly_returns_tplus1))
-    P1_alpha.append(P1_return[-1]-rf_tplus1)    
+    P1_alpha.append(P1_return[-1]-rf_tplus1[0])    
 
 
     #2) the portfolio that maximizes the Sharpe ratio with short-sale constraints;
     (tmp1, tmp2, tmp3) = myf.minvarpf_noshortsale(working_monthly_returns, 5, rf[0], risk_free_allowed = False, tangency = True)
     P2_weights = tmp3
     P2_return.append(myf.prtf_return(P2_weights,montly_returns_tplus1))
-    P2_alpha.append(P2_return[-1]-rf_tplus1)
+    P2_alpha.append(P2_return[-1]-rf_tplus1[0])
 
 
     #3) the portfolio where the weight of each asset is inversely related to its variance;
@@ -130,7 +135,7 @@ for date in date_vec_btst:
     Inv_variance =  sum(P3_weights)              
     P3_weights = P3_weights/Inv_variance
     P3_return.append(myf.prtf_return(P3_weights,montly_returns_tplus1))
-    P3_alpha.append(P3_return[-1]-rf_tplus1)
+    P3_alpha.append(P3_return[-1]-rf_tplus1[0])
 
 
     #4) the portfolio where the weight of each asset is inversely related to its volatility;
@@ -138,7 +143,7 @@ for date in date_vec_btst:
     Inv_volatility =  sum(P4_weights)
     P4_weights = P4_weights/Inv_volatility
     P4_return.append(myf.prtf_return(P4_weights,montly_returns_tplus1))
-    P4_alpha.append(P4_return[-1]-rf_tplus1)
+    P4_alpha.append(P4_return[-1]-rf_tplus1[0])
 
 
     #6) the portfolio where the weight of each is linearly related to its market capitalization;
@@ -146,7 +151,7 @@ for date in date_vec_btst:
     P6_weights = (avg_firm_size * num_firms) / total_market_cap
     P6_weights=P6_weights.to_numpy()
     P6_return.append(myf.prtf_return(P6_weights,montly_returns_tplus1))
-    P6_alpha.append(P6_return[-1]-rf_tplus1)
+    P6_alpha.append(P6_return[-1]-rf_tplus1[0])
 
 # Computing and comparing performance Sharpe Ratios
 P1_SR_OS1 = np.asarray(P1_alpha).mean() / np.std(np.asarray(P1_alpha))
@@ -157,30 +162,27 @@ P5_SR_OS1 = np.asarray(P5_alpha).mean() / np.std(np.asarray(P5_alpha))
 P6_SR_OS1 = np.asarray(P6_alpha).mean() / np.std(np.asarray(P6_alpha))
 P7_SR_OS1 = np.asarray(P7_alpha).mean() / np.std(np.asarray(P7_alpha))
 
-P1_SR_OS2 = np.asarray(P1_alpha[idx_start_2:idx_end]).mean() / np.std(np.asarray(P1_alpha[idx_start_2:idx_end]))
-P2_SR_OS2 = np.asarray(P2_alpha[idx_start_2:idx_end]).mean() / np.std(np.asarray(P2_alpha[idx_start_2:idx_end]))
-P3_SR_OS2 = np.asarray(P3_alpha[idx_start_2:idx_end]).mean() / np.std(np.asarray(P3_alpha[idx_start_2:idx_end]))
-P4_SR_OS2 = np.asarray(P4_alpha[idx_start_2:idx_end]).mean() / np.std(np.asarray(P4_alpha[idx_start_2:idx_end]))
-P5_SR_OS2 = np.asarray(P5_alpha[idx_start_2:idx_end]).mean() / np.std(np.asarray(P5_alpha[idx_start_2:idx_end]))
-P6_SR_OS2 = np.asarray(P6_alpha[idx_start_2:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_start_2:idx_end]))
-P7_SR_OS2 = np.asarray(P7_alpha[idx_start_2:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_start_2:idx_end]))
+P1_SR_OS2 = np.asarray(P1_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P1_alpha[idx_end-idx_start_2:idx_end]))
+P2_SR_OS2 = np.asarray(P2_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P2_alpha[idx_end-idx_start_2:idx_end]))
+P3_SR_OS2 = np.asarray(P3_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P3_alpha[idx_end-idx_start_2:idx_end]))
+P4_SR_OS2 = np.asarray(P4_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P4_alpha[idx_end-idx_start_2:idx_end]))
+P5_SR_OS2 = np.asarray(P5_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P5_alpha[idx_end-idx_start_2:idx_end]))
+P6_SR_OS2 = np.asarray(P6_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_end-idx_start_2:idx_end]))
+P7_SR_OS2 = np.asarray(P7_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_end-idx_start_2:idx_end]))
 
-P1_SR_OS3 = np.asarray(P1_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray(P1_alpha[idx_start_3:idx_end]))
-P2_SR_OS3 = np.asarray(P2_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray(P2_alpha[idx_start_3:idx_end]))
-P3_SR_OS3 = np.asarray(P3_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray(P3_alpha[idx_start_3:idx_end]))
-P4_SR_OS3 = np.asarray(P4_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray(P4_alpha[idx_start_3:idx_end]))
-P5_SR_OS3 = np.asarray(P5_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray(P5_alpha[idx_start_3:idx_end]))
-P6_SR_OS3 = np.asarray(P6_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_start_3:idx_end]))
-P7_SR_OS3 = np.asarray(P7_alpha[idx_start_3:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_start_3:idx_end]))
+P1_SR_OS3 = np.asarray(P1_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P1_alpha[idx_end-idx_start_3:idx_end]))
+P2_SR_OS3 = np.asarray(P2_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P2_alpha[idx_end-idx_start_3:idx_end]))
+P3_SR_OS3 = np.asarray(P3_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P3_alpha[idx_end-idx_start_3:idx_end]))
+P4_SR_OS3 = np.asarray(P4_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P4_alpha[idx_end-idx_start_3:idx_end]))
+P5_SR_OS3 = np.asarray(P5_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P5_alpha[idx_end-idx_start_3:idx_end]))
+P6_SR_OS3 = np.asarray(P6_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_end-idx_start_3:idx_end]))
+P7_SR_OS3 = np.asarray(P7_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_end-idx_start_3:idx_end]))
 
-Part_A_SR_table = pd.DataFrame(np.asarray([[P1_SR_OS1, P1_SR_OS2, P1_SR_OS3],...
-[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],...
-[P3_SR_OS1, P3_SR_OS2, P3_SR_OS3],...
-[P4_SR_OS1, P4_SR_OS2, P4_SR_OS3],...
-[P5_SR_OS1, P5_SR_OS2, P5_SR_OS3],...
-[P6_SR_OS1, P6_SR_OS2, P6_SR_OS3],...
-[P7_SR_OS1, P7_SR_OS2, P7_SR_OS3],...
-]),columns=['a','b','c'])
+test_array = [[P1_SR_OS1, P1_SR_OS2, P1_SR_OS3],[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],...
+[P3_SR_OS1, P3_SR_OS2, P3_SR_OS3],[P4_SR_OS1, P4_SR_OS2, P4_SR_OS3],...
+[P5_SR_OS1, P5_SR_OS2, P5_SR_OS3],[P6_SR_OS1, P6_SR_OS2, P6_SR_OS3],[P7_SR_OS1, P7_SR_OS2, P7_SR_OS3]]
+
+Part_A_SR_table = pd.DataFrame(np.asarray(test_array),columns=['a','b','c'])
                                     
                                             #'SR for Jul 1931 Dec 2019',\
                                             #...'SR for Jan 1990 Dec 2019',\
