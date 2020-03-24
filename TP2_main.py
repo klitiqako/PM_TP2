@@ -34,6 +34,7 @@ end_date            = "2020-01-01"
 #start_date_3        = "1936-01-01"
 #end_date            = "1938-01-01"
 
+TE_threshold        = 0.01
 rolling_window      = 60 # Number of weeks in period used for estimation 5 years
 idx_start_1         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_1)
 idx_start_2         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_2)
@@ -54,6 +55,11 @@ P5_weights          = []               # 10 x n
 P6_weights          = []               # 10 x n
 P7_weights          = []               # 10 x n
 
+PB_3_1_weights        = []        # Part B #3 bench 1
+PB_3_2_weights        = []        # Part B #3 bench 2
+PB_4_1_weights        = []        # Part B #4 bench 1
+PB_4_2_weights        = []  
+
 P1_return           = []                # 1 x n
 P2_return           = []                # 1 x n 
 P3_return           = []                # 1 x n 
@@ -61,6 +67,11 @@ P4_return           = []                # 1 x n
 P5_return           = []                # 1 x n 
 P6_return           = []                # 1 x n 
 P7_return           = []                # 1 x n 
+
+PB_3_1_return        = []        # Part B #3 bench 1
+PB_3_2_return        = []        # Part B #3 bench 2
+PB_4_1_return        = []        # Part B #4 bench 1
+PB_4_2_return        = []        # Part B #4 bench 2
 
 P1_alpha            = []                # 1 x n
 P2_alpha            = []                # 1 x n
@@ -70,12 +81,16 @@ P5_alpha            = []                # 1 x n
 P6_alpha            = []                # 1 x n
 P7_alpha            = []                # 1 x n
 
+PB_3_1_alpha        = []        # Part B #3 bench 1
+PB_3_2_alpha        = []        # Part B #3 bench 2
+PB_4_1_alpha        = []        # Part B #4 bench 1
+PB_4_2_alpha        = []        # Part B #4 bench 2
+
 portfolio_sharpe_ratio = []             # 7 x 1 
 
 
 for date in date_vec_btst:
     print(date)
-    # Cleaning and Preping the Data
 
     # Cleaning and Preping the Data
     idx                     = date_vec.get_loc(date)
@@ -153,7 +168,17 @@ for date in date_vec_btst:
     P6_weights=P6_weights.to_numpy()
     P6_return.append(myf.prtf_return(P6_weights,montly_returns_tplus1))
     P6_alpha.append(P6_return[-1]-rf_tplus1[0])
-
+    
+    # Using the loop to calculate the Part B #3)
+    # Basically prtf less than 1% mthly TE without short sale constraints and with short sale constraints
+    constraint_TE = {'type': 'ineq', 'fun': myf.constraint_on_TE}
+    TE_without_ss_constraints = [constraint_weights, constraint_TE]
+    tmp = minimize(myf.tangency_objective, P5_weights, args=(P6_weights, covariance_matrix, TE_threshold), method="SLSQP", constraints=tangency_constraints)
+    PB_3_1_weights = tmp.x
+    PB_3_1_return.append(myf.prtf_return(PB_3_1_weights,montly_returns_tplus1))
+    PB_3_1_alpha.append(PB_3_1_return[-1]-rf_tplus1[0])
+    
+    
 # Computing and comparing performance Sharpe Ratios
 P1_SR_OS1 = np.asarray(P1_alpha).mean() / np.std(np.asarray(P1_alpha))
 P2_SR_OS1 = np.asarray(P2_alpha).mean() / np.std(np.asarray(P2_alpha))
