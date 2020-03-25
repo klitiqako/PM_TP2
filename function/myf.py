@@ -33,7 +33,7 @@ def constraint_on_short_sell(weights):
     return weights
 
 def constraint_on_TE(weights,bench_weights,covariance_matrix,TE_threshold):
-    return -((weights-bench_weights).dot(covariance_matrix)).dot(weights-bench_weights) + TE_threshold
+    return -((weights-bench_weights).dot(covariance_matrix)).dot(weights-bench_weights) + (TE_threshold ** 2)
 
 
 def minvarpf(x, mu, risk_free_rate = 0., risk_free_allowed = False , tangency = False):
