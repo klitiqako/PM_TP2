@@ -552,22 +552,97 @@ EW_Strat2_Returns = np.cumprod(1 + Return_EW_Strat2/ 100).iloc[-1,:]
 plt.plot(np.cumprod(1 + Return_EW_Strat2 / 100))
 
 #Regression on FAMA factors
-#1950-2019
+#3-FACTORS
 
 Periods = ['1949-12-01','1989-12-01','1999-12-01']
-alphas_3_Factors = pd.DataFrame(np.zeros((3,5)))
-alphas_3_Factors.columns = EW_Strat2_Returns.index
+alpha_3_EW = pd.DataFrame(np.zeros((3,5)))
+alpha_3_EW.columns = EW_Strat2_Returns.index
+alpha_3_VW = pd.DataFrame(np.zeros((3,5)))
+alpha_3_VW.columns = EW_Strat2_Returns.index
+alpha_3_EW_LowStrat = pd.DataFrame(np.zeros((3,5)))
+alpha_3_EW_LowStrat.columns = EW_Strat2_Returns.index
+alpha_3_EW_Strat2 = pd.DataFrame(np.zeros((3,5)))
+alpha_3_EW_Strat2.columns = EW_Strat2_Returns.index
+alpha_3_VW_LowStrat = pd.DataFrame(np.zeros((3,5)))
+alpha_3_VW_LowStrat.columns = EW_Strat2_Returns.index
 
-for k in range(0,5):
-    for i in range(0,3):
-        X = df_Fama_3.iloc[:,:3][(df_Fama_3.index < '2020-01-01')&(df_Fama_3.index > Periods[i])]
-        X = sm.add_constant(X)
-        Y = Return_EW_Strat2.iloc[:,k][(Return_EW.index < '2020-01-01')&(Return_EW.index > Periods[i])]
-        alpha = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))[0]
-        alphas_3_Factors.iloc[i,k] = alpha
+Strategies_Returns = [Return_EW, Return_VW, Return_EW_LowStrat, Return_EW_Strat2, Return_VW_LowStrat]
+alphas_3_Factors = [alpha_3_EW,alpha_3_VW,alpha_3_EW_LowStrat,alpha_3_EW_Strat2,alpha_3_VW_LowStrat]
 
-X = df_Fama_3.iloc[:,:3][(df_Fama_3.index < '2020-01-01')&(df_Fama_3.index > Periods[0])]
-X = sm.add_constant(X)
-Y = Return_EW_Strat2.iloc[:,0][(Return_EW_Strat2.index < '2020-01-01')&(Return_EW_Strat2.index > '1949-12-01')]
-beta = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
-beta
+for S in range(0, len(alphas_3_Factors)):
+    for k in range(0,5):
+        for i in range(0,len(Periods)):
+            X = df_Fama_3.iloc[:,:3][(df_Fama_3.index < '2020-01-01')&(df_Fama_3.index > Periods[i])]/100
+            X = sm.add_constant(X)
+            Y = Strategies_Returns[S].iloc[:,k][(Strategies_Returns[S].index < '2020-01-01')&(Strategies_Returns[S].index > Periods[i])] - df_Fama_3.iloc[:,3][(df_Fama_3.index < '2020-01-01')&(df_Fama_3.index > Periods[i])]/100
+            alpha = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))[0]
+            alphas_3_Factors[S].iloc[i,k] = alpha
+
+#4 & 5 Factors
+        
+Periods = ['1963-06-01','1989-12-01','1999-12-01']
+alpha_4_EW = pd.DataFrame(np.zeros((3,5)))
+alpha_4_EW.columns = EW_Strat2_Returns.index
+alpha_4_VW = pd.DataFrame(np.zeros((3,5)))
+alpha_4_VW.columns = EW_Strat2_Returns.index
+alpha_4_EW_LowStrat = pd.DataFrame(np.zeros((3,5)))
+alpha_4_EW_LowStrat.columns = EW_Strat2_Returns.index
+alpha_4_EW_Strat2 = pd.DataFrame(np.zeros((3,5)))
+alpha_4_EW_Strat2.columns = EW_Strat2_Returns.index
+alpha_4_VW_LowStrat = pd.DataFrame(np.zeros((3,5)))
+alpha_4_VW_LowStrat.columns = EW_Strat2_Returns.index
+
+alphas_4_Factors = [alpha_4_EW,alpha_4_VW,alpha_4_EW_LowStrat,alpha_4_EW_Strat2,alpha_4_VW_LowStrat]
+
+for S in range(0,len(alphas_4_Factors)):
+    for k in range(0,5):
+        for i in range(0,len(Periods)):
+            X = df_Fama_5.iloc[:,:4][(df_Fama_5.index < '2020-01-01')&(df_Fama_5.index > Periods[i])]/100
+            X = sm.add_constant(X)
+            Y = Strategies_Returns[S].iloc[:,k][(Strategies_Returns[S].index < '2020-01-01')&(Strategies_Returns[S].index > Periods[i])] - df_Fama_5.iloc[:,4][(df_Fama_5.index < '2020-01-01')&(df_Fama_5.index > Periods[i])]/100
+            alpha = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))[0]
+            alphas_4_Factors[S].iloc[i,k] = alpha
+        
+alpha_5_EW = pd.DataFrame(np.zeros((3,5)))
+alpha_5_EW.columns = EW_Strat2_Returns.index
+alpha_5_VW = pd.DataFrame(np.zeros((3,5)))
+alpha_5_VW.columns = EW_Strat2_Returns.index
+alpha_5_EW_LowStrat = pd.DataFrame(np.zeros((3,5)))
+alpha_5_EW_LowStrat.columns = EW_Strat2_Returns.index
+alpha_5_EW_Strat2 = pd.DataFrame(np.zeros((3,5)))
+alpha_5_EW_Strat2.columns = EW_Strat2_Returns.index
+alpha_5_VW_LowStrat = pd.DataFrame(np.zeros((3,5)))
+alpha_5_VW_LowStrat.columns = EW_Strat2_Returns.index
+
+alphas_5_Factors = [alpha_5_EW,alpha_5_VW,alpha_5_EW_LowStrat,alpha_5_EW_Strat2,alpha_5_VW_LowStrat]
+
+for S in range(0,len(alphas_5_Factors)):
+    for k in range(0,5):
+        for i in range(0,len(Periods)):
+            X = df_Fama_5.iloc[:,:5][(df_Fama_5.index < '2020-01-01')&(df_Fama_5.index > Periods[i])]/100
+            X = sm.add_constant(X)
+            Y = Strategies_Returns[S].iloc[:,k][(Strategies_Returns[S].index < '2020-01-01')&(Strategies_Returns[S].index > Periods[i])] - df_Fama_5.iloc[:,4][(df_Fama_5.index < '2020-01-01')&(df_Fama_5.index > Periods[i])]/100
+            alpha = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))[0]
+            alphas_5_Factors[S].iloc[i,k] = alpha
+        
+#Sharpe
+
+Periods = ['1949-12-01','1989-12-01','1999-12-01']
+Sharpe_EW = pd.DataFrame(np.zeros((3,5)))
+Sharpe_EW.columns = EW_Strat2_Returns.index
+Sharpe_VW = pd.DataFrame(np.zeros((3,5)))
+Sharpe_VW.columns = EW_Strat2_Returns.index
+Sharpe_EW_LowStrat = pd.DataFrame(np.zeros((3,5)))
+Sharpe_EW_LowStrat.columns = EW_Strat2_Returns.index
+Sharpe_EW_Strat2 = pd.DataFrame(np.zeros((3,5)))
+Sharpe_EW_Strat2.columns = EW_Strat2_Returns.index
+Sharpe_VW_LowStrat = pd.DataFrame(np.zeros((3,5)))
+Sharpe_VW_LowStrat.columns = EW_Strat2_Returns.index
+
+Sharpe = [Sharpe_EW, Sharpe_VW, Sharpe_EW_LowStrat, Sharpe_EW_Strat2, Sharpe_VW_LowStrat]
+
+for S in range(0, len(Strategies_Returns)):
+    for k in range(0,5):
+        for i in range(0,len(Periods)):
+            Sharpe_i = (np.mean(Strategies_Returns[S].iloc[:,k][(Strategies_Returns[S].index < '2020-01-01')&(Strategies_Returns[S].index > Periods[i])] - df_Fama_3.iloc[:,3][(df_Fama_3.index < '2020-01-01')&(df_Fama_3.index > Periods[i])]/100))/np.std(Strategies_Returns[S].iloc[:,k][(Strategies_Returns[S].index < '2020-01-01')&(Strategies_Returns[S].index > Periods[i])])
+            Sharpe[S].iloc[i,k] = Sharpe_i
