@@ -75,7 +75,7 @@ Book_to_Mkt_C.columns = industries
 
 
 for i in range(0,len(Book_to_Mkt_C)):
-    #for j in range(0,len(industries)):
+    
     if Book_to_Mkt_C.index[i].year == df_MktBook.index[0].year:
         B_M_1 = df_MktBook[df_MktBook.index.year == Book_to_Mkt_C.index[i].year]
         Book_to_Mkt_C.iloc[i,:] = np.array(B_M_1)
