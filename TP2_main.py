@@ -29,10 +29,10 @@ start_date_2        = "1990-01-01"
 start_date_3        = "2000-01-01"
 end_date            = "2020-01-01"
 
-# To test shorter period
-#start_date_2        = "1934-01-01"
-#start_date_3        = "1936-01-01"
-#end_date            = "1938-01-01"
+#To test shorter period
+start_date_2        = "1934-01-01"
+start_date_3        = "1936-01-01"
+end_date            = "1938-01-01"
 
 TE_threshold        = 0.01
 rolling_window      = 60 # Number of weeks in period used for estimation 5 years
@@ -41,10 +41,10 @@ idx_start_2         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_2)
 idx_start_3         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_3)
 idx_end             = list(date_vec.strftime("%Y-%m-%d")).index(end_date)
 date_vec_btst       = date_vec[idx_start_1:idx_end].strftime("%Y-%m-%d")
-#date_vec_prd2       = date_vec[idx_start_2:idx_end].strftime("%Y-%m-%d")
-#date_vec_prd3       = date_vec[idx_start_3:idx_end].strftime("%Y-%m-%d")
-#idx2                = date_vec.get_loc(date_vec_prd2)
-#idx3                = date_vec.get_loc(date_vec_prd3)
+
+# Constraint functions defined as dictionaries that don't change
+constraint_weights      = {'type': 'eq', 'fun': myf.constraint_on_weights}
+constraint_short_sell   = {'type': 'ineq', 'fun': myf.constraint_on_short_sell}
 
 # Initialization Empty vectors
 P1_weights          = []               # 10 x n
@@ -86,8 +86,9 @@ PB_3_2_alpha        = []        # Part B #3 bench 2
 PB_4_1_alpha        = []        # Part B #4 bench 1
 PB_4_2_alpha        = []        # Part B #4 bench 2
 
-portfolio_sharpe_ratio = []             # 7 x 1 
 
+
+##--------------------- Building the different portfolios in 1 loop----------- 
 
 for date in date_vec_btst:
     print(date)
@@ -116,6 +117,21 @@ for date in date_vec_btst:
     P5_weights = np.full([n_industries],1/n_industries)
     P5_return.append(myf.prtf_return(P5_weights,montly_returns_tplus1))
     P5_alpha.append(P5_return[-1]-rf_tplus1[0])
+    
+    # Using the loop to calculate the prtf of Part B #3) (without ss) and #4) (with ss)
+    # which track the benchmark portfolios with a maximum tracking error of 1% monthly
+    constraint_TE = {'type': 'ineq', 'fun': myf.constraint_on_TE, 'args':(P5_weights,covariance_matrix,TE_threshold)}
+    TE_without_ss_constraints = [constraint_weights, constraint_TE]
+    tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=tangency_constraints)
+    PB_3_2_weights = tmp.x
+    PB_3_2_return.append(myf.prtf_return(PB_3_2_weights,montly_returns_tplus1))
+    PB_3_2_alpha.append(PB_3_2_return[-1]-rf_tplus1[0])
+    
+    TE_with_ss_constraints = [constraint_weights, constraint_TE, constraint_short_sell]
+    tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=tangency_constraints)
+    PB_4_2_weights = tmp.x
+    PB_4_2_return.append(myf.prtf_return(PB_4_2_weights,montly_returns_tplus1))
+    PB_4_2_alpha.append(PB_4_2_return[-1]-rf_tplus1[0])
 
 
     #7) the portfolio with the minimum variance;
@@ -131,7 +147,6 @@ for date in date_vec_btst:
     #    P1_weights = tmp3
     #    P1_return.append(myf.prtf_return(P1_weights,montly_returns_tplus1))
     #else:
-    constraint_weights = {'type': 'eq', 'fun': myf.constraint_on_weights}
     tangency_constraints = [constraint_weights]
     tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=tangency_constraints)
     P1_weights = tmp.x
@@ -169,88 +184,149 @@ for date in date_vec_btst:
     P6_return.append(myf.prtf_return(P6_weights,montly_returns_tplus1))
     P6_alpha.append(P6_return[-1]-rf_tplus1[0])
     
-    # Using the loop to calculate the Part B #3)
-    # Basically prtf less than 1% mthly TE without short sale constraints and with short sale constraints
-    constraint_TE = {'type': 'ineq', 'fun': myf.constraint_on_TE}
+    # Using the loop to calculate the prtf of Part B #3) (without ss) and #4) (with ss)
+    # which track the benchmark portfolios with a maximum tracking error of 1% monthly
+    constraint_TE = {'type': 'ineq', 'fun': myf.constraint_on_TE, 'args':(P6_weights,covariance_matrix,TE_threshold)}
     TE_without_ss_constraints = [constraint_weights, constraint_TE]
-    tmp = minimize(myf.tangency_objective, P5_weights, args=(P6_weights, covariance_matrix, TE_threshold), method="SLSQP", constraints=tangency_constraints)
+    tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=tangency_constraints)
     PB_3_1_weights = tmp.x
     PB_3_1_return.append(myf.prtf_return(PB_3_1_weights,montly_returns_tplus1))
     PB_3_1_alpha.append(PB_3_1_return[-1]-rf_tplus1[0])
     
+    TE_with_ss_constraints = [constraint_weights, constraint_TE, constraint_short_sell]
+    tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=tangency_constraints)
+    PB_4_1_weights = tmp.x
+    PB_4_1_return.append(myf.prtf_return(PB_4_1_weights,montly_returns_tplus1))
+    PB_4_1_alpha.append(PB_4_1_return[-1]-rf_tplus1[0])
     
-# Computing and comparing performance Sharpe Ratios
-P1_SR_OS1 = np.asarray(P1_alpha).mean() / np.std(np.asarray(P1_alpha))
-P2_SR_OS1 = np.asarray(P2_alpha).mean() / np.std(np.asarray(P2_alpha))
-P3_SR_OS1 = np.asarray(P3_alpha).mean() / np.std(np.asarray(P3_alpha))
-P4_SR_OS1 = np.asarray(P4_alpha).mean() / np.std(np.asarray(P4_alpha))
-P5_SR_OS1 = np.asarray(P5_alpha).mean() / np.std(np.asarray(P5_alpha))
-P6_SR_OS1 = np.asarray(P6_alpha).mean() / np.std(np.asarray(P6_alpha))
-P7_SR_OS1 = np.asarray(P7_alpha).mean() / np.std(np.asarray(P7_alpha))
+    
+# Computing and comparing performance Sharpe Ratios accross periods
+P1_SR_OS1       = np.asarray(P1_alpha).mean() / np.std(np.asarray(P1_alpha))
+P2_SR_OS1       = np.asarray(P2_alpha).mean() / np.std(np.asarray(P2_alpha))
+P3_SR_OS1       = np.asarray(P3_alpha).mean() / np.std(np.asarray(P3_alpha))
+P4_SR_OS1       = np.asarray(P4_alpha).mean() / np.std(np.asarray(P4_alpha))
+P5_SR_OS1       = np.asarray(P5_alpha).mean() / np.std(np.asarray(P5_alpha))
+P6_SR_OS1       = np.asarray(P6_alpha).mean() / np.std(np.asarray(P6_alpha))
+P7_SR_OS1       = np.asarray(P7_alpha).mean() / np.std(np.asarray(P7_alpha))
+PB_3_1_SR_OS1   = np.asarray(PB_3_1_alpha).mean() / np.std(np.asarray(PB_3_1_alpha))
+PB_3_2_SR_OS1   = np.asarray(PB_3_2_alpha).mean() / np.std(np.asarray(PB_3_2_alpha))
+PB_4_1_SR_OS1   = np.asarray(PB_4_1_alpha).mean() / np.std(np.asarray(PB_4_1_alpha))
+PB_4_2_SR_OS1   = np.asarray(PB_4_2_alpha).mean() / np.std(np.asarray(PB_4_2_alpha))
 
-P1_SR_OS2 = np.asarray(P1_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P1_alpha[idx_end-idx_start_2:idx_end]))
-P2_SR_OS2 = np.asarray(P2_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P2_alpha[idx_end-idx_start_2:idx_end]))
-P3_SR_OS2 = np.asarray(P3_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P3_alpha[idx_end-idx_start_2:idx_end]))
-P4_SR_OS2 = np.asarray(P4_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P4_alpha[idx_end-idx_start_2:idx_end]))
-P5_SR_OS2 = np.asarray(P5_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P5_alpha[idx_end-idx_start_2:idx_end]))
-P6_SR_OS2 = np.asarray(P6_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_end-idx_start_2:idx_end]))
-P7_SR_OS2 = np.asarray(P7_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_end-idx_start_2:idx_end]))
 
-P1_SR_OS3 = np.asarray(P1_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P1_alpha[idx_end-idx_start_3:idx_end]))
-P2_SR_OS3 = np.asarray(P2_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P2_alpha[idx_end-idx_start_3:idx_end]))
-P3_SR_OS3 = np.asarray(P3_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P3_alpha[idx_end-idx_start_3:idx_end]))
-P4_SR_OS3 = np.asarray(P4_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P4_alpha[idx_end-idx_start_3:idx_end]))
-P5_SR_OS3 = np.asarray(P5_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P5_alpha[idx_end-idx_start_3:idx_end]))
-P6_SR_OS3 = np.asarray(P6_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_end-idx_start_3:idx_end]))
-P7_SR_OS3 = np.asarray(P7_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_end-idx_start_3:idx_end]))
+P1_SR_OS2       = np.asarray(P1_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P1_alpha[idx_end-idx_start_2:idx_end]))
+P2_SR_OS2       = np.asarray(P2_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P2_alpha[idx_end-idx_start_2:idx_end]))
+P3_SR_OS2       = np.asarray(P3_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P3_alpha[idx_end-idx_start_2:idx_end]))
+P4_SR_OS2       = np.asarray(P4_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P4_alpha[idx_end-idx_start_2:idx_end]))
+P5_SR_OS2       = np.asarray(P5_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P5_alpha[idx_end-idx_start_2:idx_end]))
+P6_SR_OS2       = np.asarray(P6_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_end-idx_start_2:idx_end]))
+P7_SR_OS2       = np.asarray(P7_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_end-idx_start_2:idx_end]))
+PB_3_1_SR_OS2   = np.asarray(PB_3_1_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(PB_3_1_alpha[idx_end-idx_start_2:idx_end]))
+PB_3_2_SR_OS2   = np.asarray(PB_3_2_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(PB_3_2_alpha[idx_end-idx_start_2:idx_end]))
+PB_4_1_SR_OS2   = np.asarray(PB_4_1_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(PB_4_1_alpha[idx_end-idx_start_2:idx_end]))
+PB_4_2_SR_OS2   = np.asarray(PB_4_2_alpha[idx_end-idx_start_2:idx_end]).mean() / np.std(np.asarray(PB_4_2_alpha[idx_end-idx_start_2:idx_end]))
 
-test_array = [[P1_SR_OS1, P1_SR_OS2, P1_SR_OS3],[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],[P3_SR_OS1, P3_SR_OS2, P3_SR_OS3],[P4_SR_OS1, P4_SR_OS2, P4_SR_OS3],[P5_SR_OS1, P5_SR_OS2, P5_SR_OS3],[P6_SR_OS1, P6_SR_OS2, P6_SR_OS3],[P7_SR_OS1, P7_SR_OS2, P7_SR_OS3]]
 
-Part_A_SR_table = pd.DataFrame(np.asarray(test_array),columns=['SR for Jul 1931-Dec 2019','SR for Jan 1990-Dec 2019','SR for Jan 2000-Dec 2019'])
-                                    
-print(Part_A_SR_table)
+P1_SR_OS3       = np.asarray(P1_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P1_alpha[idx_end-idx_start_3:idx_end]))
+P2_SR_OS3       = np.asarray(P2_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P2_alpha[idx_end-idx_start_3:idx_end]))
+P3_SR_OS3       = np.asarray(P3_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P3_alpha[idx_end-idx_start_3:idx_end]))
+P4_SR_OS3       = np.asarray(P4_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P4_alpha[idx_end-idx_start_3:idx_end]))
+P5_SR_OS3       = np.asarray(P5_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P5_alpha[idx_end-idx_start_3:idx_end]))
+P6_SR_OS3       = np.asarray(P6_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P6_alpha[idx_end-idx_start_3:idx_end]))
+P7_SR_OS3       = np.asarray(P7_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(P7_alpha[idx_end-idx_start_3:idx_end]))
+PB_3_1_SR_OS3   = np.asarray(PB_3_1_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(PB_3_1_alpha[idx_end-idx_start_3:idx_end]))
+PB_3_2_SR_OS3   = np.asarray(PB_3_2_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(PB_3_2_alpha[idx_end-idx_start_3:idx_end]))
+PB_4_1_SR_OS3   = np.asarray(PB_4_1_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(PB_4_1_alpha[idx_end-idx_start_3:idx_end]))
+PB_4_2_SR_OS3   = np.asarray(PB_4_2_alpha[idx_end-idx_start_3:idx_end]).mean() / np.std(np.asarray(PB_4_2_alpha[idx_end-idx_start_3:idx_end]))
 
-# Computing compounded return for the 1st period and Graph
-NAV_P1_return = np.cumprod(1+ np.array(P1_return) / 100)
-NAV_P2_return = np.cumprod(1+ np.array(P2_return) / 100)
-NAV_P3_return = np.cumprod(1+ np.array(P3_return) / 100)
-NAV_P4_return = np.cumprod(1+ np.array(P4_return) / 100)
-NAV_P5_return = np.cumprod(1+ np.array(P5_return) / 100)
-NAV_P6_return = np.cumprod(1+ np.array(P6_return) / 100)
-NAV_P7_return = np.cumprod(1+ np.array(P7_return) / 100)
+# Presenting SR in a table
+test_array = [[P1_SR_OS1, P1_SR_OS2, P1_SR_OS3],[P2_SR_OS1, P2_SR_OS2, P2_SR_OS3],[P3_SR_OS1, P3_SR_OS2, P3_SR_OS3],[P4_SR_OS1, P4_SR_OS2, P4_SR_OS3],[P5_SR_OS1, P5_SR_OS2, P5_SR_OS3],[P6_SR_OS1, P6_SR_OS2, P6_SR_OS3],[P7_SR_OS1, P7_SR_OS2, P7_SR_OS3],[PB_3_1_SR_OS1, PB_3_1_SR_OS2, PB_3_1_SR_OS3],[PB_3_2_SR_OS1, PB_3_2_SR_OS2, PB_3_2_SR_OS3],[PB_4_1_SR_OS1, PB_4_1_SR_OS2, PB_4_1_SR_OS3],[PB_4_2_SR_OS1, PB_4_2_SR_OS2, PB_4_2_SR_OS3]]
+SR_table = pd.DataFrame(np.asarray(test_array),columns=['SR for Jul 1931-Dec 2019','SR for Jan 1990-Dec 2019','SR for Jan 2000-Dec 2019'])
+print(SR_table)
 
-NAV = np.transpose([NAV_P1_return, NAV_P2_return, NAV_P3_return, NAV_P4_return, NAV_P5_return, NAV_P6_return, NAV_P7_return])
+
+# Computing compounded return for the 1st period
+NAV_P1_return           = np.cumprod(1+ np.array(P1_return) / 100)
+NAV_P2_return           = np.cumprod(1+ np.array(P2_return) / 100)
+NAV_P3_return           = np.cumprod(1+ np.array(P3_return) / 100)
+NAV_P4_return           = np.cumprod(1+ np.array(P4_return) / 100)
+NAV_P5_return           = np.cumprod(1+ np.array(P5_return) / 100)
+NAV_P6_return           = np.cumprod(1+ np.array(P6_return) / 100)
+NAV_P7_return           = np.cumprod(1+ np.array(P7_return) / 100)
+NAV_PB_3_1_return       = np.cumprod(1+ np.array(PB_3_1_return) / 100)
+NAV_PB_3_2_return       = np.cumprod(1+ np.array(PB_3_2_return) / 100)
+NAV_PB_4_1_return       = np.cumprod(1+ np.array(PB_4_1_return) / 100)
+NAV_PB_4_2_return       = np.cumprod(1+ np.array(PB_4_2_return) / 100)
+
+
+# Computing compounded return for the 2nd period
+NAV_P1_return_OS2       = np.cumprod(1+ np.array(P1_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P2_return_OS2       = np.cumprod(1+ np.array(P2_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P3_return_OS2       = np.cumprod(1+ np.array(P3_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P4_return_OS2       = np.cumprod(1+ np.array(P4_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P5_return_OS2       = np.cumprod(1+ np.array(P5_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P6_return_OS2       = np.cumprod(1+ np.array(P6_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_P7_return_OS2       = np.cumprod(1+ np.array(P7_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_PB_3_1_return_OS2   = np.cumprod(1+ np.array(PB_3_1_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_PB_3_2_return_OS2   = np.cumprod(1+ np.array(PB_3_2_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_PB_4_1_return_OS2   = np.cumprod(1+ np.array(PB_4_1_return[idx_end-idx_start_2:idx_end]) / 100)
+NAV_PB_4_2_return_OS2   = np.cumprod(1+ np.array(PB_4_2_return[idx_end-idx_start_2:idx_end]) / 100)
+
+
+# Computing compounded return for the 3rd period and Graph
+NAV_P1_return_OS3       = np.cumprod(1+ np.array(P1_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P2_return_OS3       = np.cumprod(1+ np.array(P2_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P3_return_OS3       = np.cumprod(1+ np.array(P3_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P4_return_OS3       = np.cumprod(1+ np.array(P4_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P5_return_OS3       = np.cumprod(1+ np.array(P5_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P6_return_OS3       = np.cumprod(1+ np.array(P6_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_P7_return_OS3       = np.cumprod(1+ np.array(P7_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_PB_3_1_return_OS3   = np.cumprod(1+ np.array(PB_3_1_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_PB_3_2_return_OS3   = np.cumprod(1+ np.array(PB_3_2_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_PB_4_1_return_OS3   = np.cumprod(1+ np.array(PB_4_1_return[idx_end-idx_start_3:idx_end]) / 100)
+NAV_PB_4_2_return_OS3   = np.cumprod(1+ np.array(PB_4_2_return[idx_end-idx_start_3:idx_end]) / 100)
+
+
+# Graph of Accrued returns accross the different periods
+#NAV_P1_return, 
+NAV = np.transpose([NAV_P2_return, NAV_P3_return, NAV_P4_return, NAV_P5_return, NAV_P6_return, NAV_P7_return])
 plt.plot(NAV)
 #plt.yscale('log')
 #plt.xlabel(date_vec_btst)
 plt.show()
 
-# Computing compounded return for the 2nd period and Graph
-NAV_P1_return_OS2 = np.cumprod(1+ np.array(P1_return[idx_end-idx_start_2:idx_end]) / 100)
-NAV_P2_return_OS2 = np.cumprod(1+ np.array(P2_return[idx_end-idx_start_2:idx_end]) / 100)
-NAV_P3_return_OS2 = np.cumprod(1+ np.array(P3_return[idx_end-idx_start_2:idx_end]) / 100)
-NAV_P4_return_OS2 = np.cumprod(1+ np.array(P4_return[idx_end-idx_start_2:idx_end]) / 100)
-NAV_P5_return_OS2 = np.cumprod(1+ np.array(P5_return[idx_end-idx_start_2:idx_end]) / 100)
-NAV_P6_return_OS2 = np.cumprod(1+ np.array(P6_return[idx_end-idx_start_2:idx_end]) / 100)
-NAV_P7_return_OS2 = np.cumprod(1+ np.array(P7_return[idx_end-idx_start_2:idx_end]) / 100)
-
-NAV_OS2 = np.transpose([NAV_P1_return_OS2, NAV_P2_return_OS2, NAV_P3_return_OS2, NAV_P4_return_OS2, NAV_P5_return_OS2, NAV_P6_return_OS2, NAV_P7_return_OS2])
+#NAV_P1_return_OS2, 
+NAV_OS2 = np.transpose([NAV_P2_return_OS2, NAV_P3_return_OS2, NAV_P4_return_OS2, NAV_P5_return_OS2, NAV_P6_return_OS2, NAV_P7_return_OS2])
 plt.plot(NAV_OS2)
 #plt.yscale('log')
 #plt.xlabel(date_vec_btst)
 plt.show()
 
-# Computing compounded return for the 3rd period and Graph
-NAV_P1_return_OS3 = np.cumprod(1+ np.array(P1_return[idx_end-idx_start_3:idx_end]) / 100)
-NAV_P2_return_OS3 = np.cumprod(1+ np.array(P2_return[idx_end-idx_start_3:idx_end]) / 100)
-NAV_P3_return_OS3 = np.cumprod(1+ np.array(P3_return[idx_end-idx_start_3:idx_end]) / 100)
-NAV_P4_return_OS3 = np.cumprod(1+ np.array(P4_return[idx_end-idx_start_3:idx_end]) / 100)
-NAV_P5_return_OS3 = np.cumprod(1+ np.array(P5_return[idx_end-idx_start_3:idx_end]) / 100)
-NAV_P6_return_OS3 = np.cumprod(1+ np.array(P6_return[idx_end-idx_start_3:idx_end]) / 100)
-NAV_P7_return_OS3 = np.cumprod(1+ np.array(P7_return[idx_end-idx_start_3:idx_end]) / 100)
-
-NAV_OS3 = np.transpose([NAV_P1_return_OS3, NAV_P2_return_OS3, NAV_P3_return_OS3, NAV_P4_return_OS3, NAV_P5_return_OS3, NAV_P6_return_OS3, NAV_P7_return_OS3])
+#NAV_P1_return_OS3, 
+NAV_OS3 = np.transpose([NAV_P2_return_OS3, NAV_P3_return_OS3, NAV_P4_return_OS3, NAV_P5_return_OS3, NAV_P6_return_OS3, NAV_P7_return_OS3])
 plt.plot(NAV_OS3)
+#plt.yscale('log')
+#plt.xlabel(date_vec_btst)
+plt.show()
+
+
+# Graph of NAV of MC prtfs during enitre period
+NAV_PartB_MC = np.transpose([NAV_P6_return, NAV_PB_3_1_return, NAV_PB_4_1_return])
+plt.plot(NAV_PartB_MC)
+#plt.yscale('log')
+#plt.xlabel(date_vec_btst)
+plt.show()
+
+# Graph of NAV of MC prtfs during 2rd period
+NAV_PartB_MC_OS2 = np.transpose([NAV_P6_return_OS2, NAV_PB_3_1_return_OS2, NAV_PB_4_1_return_OS2])
+plt.plot(NAV_PartB_MC_OS2)
+#plt.yscale('log')
+#plt.xlabel(date_vec_btst)
+plt.show()
+
+# Graph of NAV of MC prtfs during 3rd period
+NAV_PartB_MC_OS3 = np.transpose([NAV_P6_return_OS3, NAV_PB_3_1_return_OS3, NAV_PB_4_1_return_OS3])
+plt.plot(NAV_PartB_MC_OS3)
 #plt.yscale('log')
 #plt.xlabel(date_vec_btst)
 plt.show()
