@@ -88,27 +88,26 @@ for i in range(0,len(Book_to_Mkt_C)):
          
 ###############Q2
 Months = df_Returns.index
-Months = Months.insert(1123,pd.to_datetime('20200201', format= '%Y%m%d'))
+Months = Months.insert(len(Months) + 1, pd.to_datetime('20200201', format= '%Y%m%d'))
 betas = np.zeros((len(df_Returns)-11,len(industries)))
 betas= pd.DataFrame(betas)
 betas.index = df_Returns.index[11:]
 betas.columns = industries
 df_Daily_Returns[df_Daily_Returns == -99.99] = np.nan
-
+df_Daily_Excess_Returns = df_Daily_Returns.subtract(df_Fama['RF'], 0)
 
 for i in range(0,len(df_Returns)-11): 
     for j in range(0,len(industries)):
         d = Months[12+i]
         d_Last12 = d - dateutil.relativedelta.relativedelta(months=11)
         X = df_Fama['Mkt-RF'][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
-        X = sm.add_constant(X)
-        Y = df_Daily_Returns.iloc[:,j][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
-        beta = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))[1]
+        Y = df_Daily_Excess_Returns.iloc[:,j][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
+        beta = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
         betas.iloc[i,j] = beta
 
 ##Checking computation time difference between package and analatycal way
 time_start = time.clock()
-a = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
+a = np.linalg.solve(np.dot(np.array(X), np.array(X).T), np.dot(np.array(X).T, np.array(Y)))
 time_elapsed1 = (time.clock() - time_start)
 
 time_start = time.clock()
