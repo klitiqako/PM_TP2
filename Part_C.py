@@ -1,3 +1,4 @@
+
 # Import library
 import pandas as pd
 import numpy as np
@@ -9,8 +10,7 @@ import datetime
 import dateutil.relativedelta
 import statsmodels.api as sm
 import time
-
-
+from function import myf
 
 ## ----------- Import data -------------------------------------------------
 
@@ -40,14 +40,15 @@ df_Fama_5 = pd.read_csv(input_file_path,
                    index_col = 0)
 
 ## ----------- Data cleansing -------------------------------------------------
-df_Returns.index = pd.to_datetime(df_Returns.index, format= '%Y%m')
-df_Firm_Size.index = pd.to_datetime(df_Firm_Size.index, format= '%Y%m')
-df_NB_Firms.index = pd.to_datetime(df_NB_Firms.index, format= '%Y%m')
-df_MktBook.index = pd.to_datetime(df_MktBook.index, format= '%Y')
+date_vec = myf.eomonth(pd.to_datetime(df_Returns.index, format= '%Y%m'))
+df_Returns.index = date_vec
+df_Firm_Size.index = myf.eomonth(pd.to_datetime(df_Firm_Size.index, format= '%Y%m'))
+df_NB_Firms.index = myf.eomonth(pd.to_datetime(df_NB_Firms.index, format= '%Y%m'))
+df_MktBook.index = myf.midyearfama(pd.to_datetime(df_MktBook.index, format= '%Y'))
 df_Daily_Returns.index = pd.to_datetime(df_Daily_Returns.index, format= '%Y%m%d')
 df_Fama.index = pd.to_datetime(df_Fama.index, format= '%Y%m%d')
-df_Fama_3.index = pd.to_datetime(df_Fama_3.index, format= '%Y%m')
-df_Fama_5.index = pd.to_datetime(df_Fama_5.index, format= '%Y%m')
+df_Fama_3.index = myf.eomonth(pd.to_datetime(df_Fama_3.index, format= '%Y%m'))
+df_Fama_5.index = myf.eomonth(pd.to_datetime(df_Fama_5.index, format= '%Y%m'))
 
 
 df_Returns.columns = df_Returns.columns.str.replace(' ', '')
@@ -59,7 +60,8 @@ df_Fama.columns = df_Fama.columns.str.replace(' ', '')
 df_Fama_3.columns = df_Fama_3.columns.str.replace(' ', '')
 df_Fama_5.columns = df_Fama_5.columns.str.replace(' ', '')
 
-
+df_Returns[df_Returns == -99.99] = np.nan
+df_NB_Firms[df_NB_Firms == 0] = np.nan
 
 industries = df_Returns.columns
 
@@ -67,7 +69,7 @@ industries = df_Returns.columns
 ###############Q1:
 Market_cap_C = df_Firm_Size*df_NB_Firms
 Momentum_C = df_Returns.rolling(12).mean()
-Momentum_C = pd.DataFrame.dropna(Momentum_C)
+
 Book_to_Mkt_C = np.zeros((len(df_Returns),len(industries)))
 Book_to_Mkt_C= pd.DataFrame(Book_to_Mkt_C)
 Book_to_Mkt_C.index = df_Returns.index
@@ -85,37 +87,35 @@ for i in range(0,len(Book_to_Mkt_C)):
     else:
         B_M_3 = df_MktBook[df_MktBook.index.year == Book_to_Mkt_C.index[i].year]
         Book_to_Mkt_C.iloc[i,:] = np.array(B_M_3)  
-         
+Book_to_Mkt_C[Book_to_Mkt_C == -99.99] = np.nan       
 ###############Q2
+lag = 12 * 5
+
+
 Months = df_Returns.index
-Months = Months.insert(len(Months) + 1, pd.to_datetime('20200201', format= '%Y%m%d'))
-betas = np.zeros((len(df_Returns)-11,len(industries)))
-betas= pd.DataFrame(betas)
-betas.index = df_Returns.index[11:]
+Months = Months.insert(len(Months) + 1, pd.to_datetime('20200229', format= '%Y%m%d'))
+betas = np.zeros((len(df_Returns)-lag - 1,len(industries)))
+betas = pd.DataFrame(betas)
+betas.index = df_Returns.index[lag+1:]
 betas.columns = industries
 df_Daily_Returns[df_Daily_Returns == -99.99] = np.nan
 df_Daily_Excess_Returns = df_Daily_Returns.subtract(df_Fama['RF'], 0)
 time_start = time.clock()
-for i in range(0,len(df_Returns)-11): 
-    d = Months[12+i]
-    d_Last12 = d - dateutil.relativedelta.relativedelta(months=11)
+for i, d in enumerate(betas.index):
+    print(i, d)
+    
+    d_Last12 = d - dateutil.relativedelta.relativedelta(months=lag)
     X = df_Fama['Mkt-RF'][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
     X_np = np.array(X)
     for j in range(0,len(industries)):
-        Y = np.array(df_Daily_Excess_Returns.iloc[:,j][(df_Fama.index < d)&(df_Fama.index >= d_Last12)])
+        Y = np.array(df_Daily_Excess_Returns.iloc[:,j][(df_Daily_Excess_Returns.index < d)&(df_Daily_Excess_Returns.index >= d_Last12)])
         Y_np = np.array(Y)
         betas.iloc[i,j] =  X_np.dot(Y_np) / (X_np.dot(X_np))
 time_elapsed = (time.clock() - time_start)
 ##Checking computation time difference between package and analatycal way
-time_start = time.clock()
-a = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
-time_elapsed1 = (time.clock() - time_start)
 
-time_start = time.clock()
-X_np = np.array(X.iloc[:,1])
-Y_np = np.array(Y)
-a = X_np.dot(Y_np) / (X_np.dot(X_np))
-time_elapsed2 = (time.clock() - time_start)
+
+
 
 
 
@@ -123,23 +123,109 @@ time_elapsed2 = (time.clock() - time_start)
 
 ###############Q3
 Idio_vol = np.zeros((len(df_Returns),len(industries)))
-Idio_vol= pd.DataFrame(Idio_vol)
+Idio_vol = pd.DataFrame(Idio_vol)
 Idio_vol.index = df_Returns.index
 Idio_vol.columns = industries
 
-
-for i in range(0,len(Idio_vol)): 
+time_start = time.clock()
+for i, d in enumerate(Idio_vol.index): 
+    print(i, d)
+    d_Last12 = d - dateutil.relativedelta.relativedelta(months=1)
+    X = df_Fama.iloc[:,:3][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
+    X = sm.add_constant(X)
     for j in range(0,len(industries)):
-        d = Months[i+1]
-        d_Last12 = d - dateutil.relativedelta.relativedelta(months=1)
-        X = df_Fama.iloc[:,:3][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
-        X = sm.add_constant(X)
-        Y = df_Daily_Returns.iloc[:,j][(df_Fama.index < d)&(df_Fama.index >= d_Last12)]
-        est = sm.OLS(Y,X).fit()
-        std_resid = np.std(est.resid)
+        Y = df_Daily_Excess_Returns.iloc[:,j][(df_Daily_Excess_Returns.index < d)&(df_Daily_Excess_Returns.index >= d_Last12)]
+        beta_Fama = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
+        resid = Y -  X @ beta_Fama.T 
+        std_resid = np.std(resid)
         Idio_vol.iloc[i,j] = std_resid
+time_elapsed1 = (time.clock() - time_start)       
+# Checking time
+time_start = time.clock()
+est = sm.OLS(Y,X).fit()
+std_resid = np.std(est.resid)
+time_elapsed = (time.clock() - time_start)
+
+time_start = time.clock()
+beta_Fama = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
+resid = Y -  X @ beta_Fama.T
+std_resid = np.std(resid)
+time_elapsed1 = (time.clock() - time_start)
+
+print(time_elapsed - time_elapsed1)
+
 
 ###############Q4
+
+# Parameters
+
+start_date = pd.to_datetime(datetime.datetime(1950, 1, 1))
+end_date = pd.to_datetime(datetime.datetime(2020, 1, 1))
+
+date_vec = df_Returns.index[(df_Returns.index >= start_date)&(df_Returns.index <= end_date)]
+
+num_long = 20
+num_short = 10
+
+long_short = pd.Series([1, -1, -1, 1, -1])
+strat = ['BAB', 'Low Vol', 'HML', 'SMB', 'MOM']
+characteristic_tmp = {'BAB': betas, 'Low Vol':Idio_vol, 'HML':Book_to_Mkt_C, 'SMB': Market_cap_C, 'MOM': Momentum_C}
+long_short.index = strat
+# Variable
+df_Returns_tplus1 = df_Returns.shift(-1)
+df_Returns_tplus1[df_Returns_tplus1 == -99.99] = np.nan
+
+NAV = np.zeros((len(date_vec), len(strat)))
+NAV = pd.DataFrame(NAV)
+NAV.index = date_vec
+NAV.columns = strat
+
+weight = {}
+for s in strat:
+    weight[s] = pd.DataFrame(np.zeros((len(date_vec), len(industries))))
+    weight[s].index = date_vec
+    weight[s].columns = industries
+
+# Initialization
+returns = pd.Series(np.zeros(len(strat)))
+returns.index = strat
+Nav_tmoins1 = pd.Series(np.ones(len(strat)))
+Nav_tmoins1.index = strat
+for date, Nav in NAV.iterrows():
+    print(date, end_date)
+    NAV.loc[date,:] = np.array(Nav_tmoins1.T) * np.array(1+returns/100)
+    for characteristic_name in strat:       
+        
+        
+        # Long
+        is_excluded = pd.isna(df_Returns_tplus1.loc[date,:])
+        is_eligible = np.logical_not(is_excluded)
+        idx_long = characteristic_tmp[characteristic_name].loc[date, is_eligible].nsmallest(num_long).index
+        weight[characteristic_name].loc[date, idx_long] = 1 / num_long * long_short.loc[characteristic_name]
+        
+        # short
+        idx_short = characteristic_tmp[characteristic_name].loc[date, is_eligible].nlargest(num_short).index
+        weight[characteristic_name].loc[date, idx_short] = -1 / num_short * long_short.loc[characteristic_name]
+        
+        idx_weight = idx_long.append(idx_short)
+        returns.loc[characteristic_name] = weight[characteristic_name].loc[date, idx_weight].dot(df_Returns_tplus1.loc[date, idx_weight])
+
+        
+    Nav_tmoins1 = NAV.loc[date,:]
+    
+    
+for characteristic_name in strat:
+    plt.plot(NAV.loc[:,characteristic_name], label = characteristic_name)
+
+plt.legend()
+plt.yscale('log')
+plt.show
+
+plt.plot(NAV.loc[:,'SMB'], label = characteristic_name)
+plt.plot(100*np.cumproduct(1+df_Fama_3.loc[:,'SMB']/100))
+plt.yscale('log')
+plt.show
+
 Volatility_Q4 = Idio_vol[11:]
 Book_to_Mkt_Q4 = Book_to_Mkt_C[11:]
 Market_cap_Q4 = Market_cap_C[11:]

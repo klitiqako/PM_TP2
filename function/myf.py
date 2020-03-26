@@ -4,6 +4,7 @@ Created on Fri Jan 17 22:52:32 2020
 @author: Keanu Vivish
 """
 import numpy as np
+import pandas as pd
 import random
 from scipy.optimize import minimize
 
@@ -246,4 +247,23 @@ def prtf_return(weights,industry_returns):
     ret = weights @ (gross_ret - 1 ) * 100
     return(ret)
         
-        
+import datetime
+
+def last_day_of_month(any_day):
+    next_month = any_day.replace(day=28) + datetime.timedelta(days=4)  # this will never fail
+    out = next_month - datetime.timedelta(days=next_month.day)
+    return out
+
+def eomonth(date_vec):
+    tmp = date_vec.date
+    out = []
+    for i in  range(len(date_vec)):
+        out.append(last_day_of_month(tmp[i]))
+    return pd.to_datetime(out)
+
+def midyearfama(date_vec):
+    tmp = date_vec
+    out = []
+    for i in  range(len(date_vec)):
+        out.append(datetime.datetime(tmp.year[i], 7, 31))
+    return pd.to_datetime(out)
