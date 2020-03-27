@@ -19,11 +19,14 @@ date_list           = date_vec.tolist()
 all_risk_free_rates = read_data.read_1_data("TP2_monthly_risk_free.csv")
 all_avg_firm_size   = read_data.read_1_data("TP2_avg_firm_size.csv")
 all_num_firms       = read_data.read_1_data("TP2_numb_of_firms.csv")
-
+sum_BE_div_sum_ME   = read_data.read_2_data("TP2_sum_BE_div_sum_ME.csv")
 
 ## ---------- Part A ----------------------------------------------------------
 
 # Parameter of the back testing
+TE_threshold        = 1
+rolling_window      = 60  # Number of weeks in period used for estimation 5 years
+
 start_date_1        = "1931-07-01"
 start_date_2        = "1990-01-01"
 start_date_3        = "2000-01-01"
@@ -34,8 +37,7 @@ start_date_2        = "1934-01-01"
 start_date_3        = "1936-01-01"
 end_date            = "1938-01-01"
 
-TE_threshold        = 1
-rolling_window      = 60  # Number of weeks in period used for estimation 5 years
+
 idx_start_1         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_1)
 idx_start_2         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_2)
 idx_start_3         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_3)
@@ -432,12 +434,16 @@ figeqw3.show()
 figeqw3.savefig('EQW_OS3.png')
 
 
-## ---------- Part B ----------------------------------------------------------
+## ---------- Part_B #5 #6 #7 #8 ----------------------------------------------------------
 
 
+# Calculating the portfolio characteristics for the all period and not just for the OS period
+Size_MC     = []
+Value_BM    = []
+Momentum    = []
 
+Size_MC.append(all_avg_firm_size * all_num_firms)
 
-
-
+Value_BM.append("1")
 
 
