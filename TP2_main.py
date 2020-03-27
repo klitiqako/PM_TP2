@@ -89,7 +89,7 @@ PB_3_2_alpha                = []        # Part B #3 bench 2
 PB_4_1_alpha                = []        # Part B #4 bench 1
 PB_4_2_alpha                = []        # Part B #4 bench 2
 
-
+Mrkt_Cap                    = []                # 10 x n
 
 ##--------------------- Building the different portfolios in 1 loop-----------
 
@@ -182,7 +182,8 @@ for date in date_vec_btst:
 
     #6) the portfolio where the weight of each is linearly related to its market capitalization;
     total_market_cap = avg_firm_size @ num_firms
-    P6_weights = (avg_firm_size * num_firms) / total_market_cap
+    Mrkt_Cap.append(avg_firm_size * num_firms)
+    P6_weights = Mrkt_Cap[-1] / total_market_cap
     P6_weights = P6_weights.to_numpy()
     P6_return.append(myf.prtf_return(P6_weights, montly_returns_tplus1))
     P6_alpha.append(P6_return[-1] - rf_tplus1[0])
