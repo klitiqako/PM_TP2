@@ -36,7 +36,7 @@ def constraint_on_short_sell(weights):
     return weights
 
 def constraint_on_short_sell_lim(weights):
-    return weights - 2
+    return weights + 10
 
 
 def constraint_on_TE(weights, bench_weights, covariance_matrix, TE_threshold):

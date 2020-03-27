@@ -34,7 +34,7 @@ start_date_2        = "1934-01-01"
 start_date_3        = "1936-01-01"
 end_date            = "1938-01-01"
 
-TE_threshold        = 0.01
+TE_threshold        = 1
 rolling_window      = 60  # Number of weeks in period used for estimation 5 years
 idx_start_1         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_1)
 idx_start_2         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_2)
@@ -124,22 +124,22 @@ for date in date_vec_btst:
     # Using the loop to calculate the prtf of Part B #3) (without ss) and #4) (with ss)
     # which track the benchmark portfolios with a maximum tracking error of 1% monthly
     constraint_TE = {'type': 'ineq', 'fun': myf.constraint_on_TE, 'args': (P5_weights, covariance_matrix, TE_threshold)}
-    TE_without_ss_constraints = [constraint_weights, constraint_short_sell_lim, constraint_TE]
-    tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=TE_without_ss_constraints)
-    PB_3_2_weights = tmp.x
+    TE_without_ss_constraints = [constraint_weights, constraint_TE, constraint_short_sell_lim]
+    sol_3_2 = minimize(myf.tangency_objective, [0, 0, 0, 0, 0, 0, 0, 0, 0, 1], args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=TE_without_ss_constraints)
+    PB_3_2_weights = sol_3_2.x
     PB_3_2_return.append(myf.prtf_return(PB_3_2_weights, montly_returns_tplus1))
     PB_3_2_alpha.append(PB_3_2_return[-1]-rf_tplus1[0])
 
     TE_with_ss_constraints = [constraint_weights, constraint_TE, constraint_short_sell]
-    tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=TE_with_ss_constraints)
-    PB_4_2_weights = tmp.x
+    sol_4_2 = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=TE_with_ss_constraints)
+    PB_4_2_weights = sol_4_2.x
     PB_4_2_return.append(myf.prtf_return(PB_4_2_weights, montly_returns_tplus1))
     PB_4_2_alpha.append(PB_4_2_return[-1]-rf_tplus1[0])
 
 
     #7) the portfolio with the minimum variance;
-    (tmp1, tmp2, tmp3) = myf.minvarpf(working_monthly_returns, [], rf[0], risk_free_allowed=False, tangency=False)
-    P7_weights = tmp3
+    (sol_7_1, sol_7_2, sol_7_3) = myf.minvarpf(working_monthly_returns, [], rf[0], risk_free_allowed=False, tangency=False)
+    P7_weights = sol_7_3
     P7_return.append(myf.prtf_return(P7_weights, montly_returns_tplus1))
     P7_alpha.append(P7_return[-1]-rf_tplus1[0])
 
@@ -150,16 +150,16 @@ for date in date_vec_btst:
     #    P1_weights = tmp3
     #    P1_return.append(myf.prtf_return(P1_weights,montly_returns_tplus1))
     #else:
-    tangency_constraints = [constraint_weights,constraint_short_sell_lim]
-    tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=tangency_constraints)
-    P1_weights = tmp.x
+    tangency_constraints = [constraint_weights, constraint_short_sell_lim]
+    sol_1 = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=tangency_constraints)
+    P1_weights = sol_1.x
     P1_return.append(myf.prtf_return(P1_weights, montly_returns_tplus1))
     P1_alpha.append(P1_return[-1]-rf_tplus1[0])
 
 
     #2) the portfolio that maximizes the Sharpe ratio with short-sale constraints;
-    (tmp1, tmp2, tmp3) = myf.minvarpf_noshortsale(working_monthly_returns, 5, rf[0], risk_free_allowed=False, tangency=True)
-    P2_weights = tmp3
+    (sol_2_1, sol_2_2, sol_2_3) = myf.minvarpf_noshortsale(working_monthly_returns, 5, rf[0], risk_free_allowed=False, tangency=True)
+    P2_weights = sol_2_3
     P2_return.append(myf.prtf_return(P2_weights, montly_returns_tplus1))
     P2_alpha.append(P2_return[-1]-rf_tplus1[0])
 
@@ -173,7 +173,7 @@ for date in date_vec_btst:
 
 
     #4) the portfolio where the weight of each asset is inversely related to its volatility;
-    P4_weights = 1/np.diag(np.sqrt(covariance_matrix))
+    P4_weights = 1/np.sqrt(np.diag(covariance_matrix))
     Inv_volatility = sum(P4_weights)
     P4_weights = P4_weights/Inv_volatility
     P4_return.append(myf.prtf_return(P4_weights, montly_returns_tplus1))
@@ -191,14 +191,14 @@ for date in date_vec_btst:
     # which track the benchmark portfolios with a maximum tracking error of 1% monthly
     constraint_TE = {'type': 'ineq', 'fun': myf.constraint_on_TE, 'args': (P6_weights, covariance_matrix, TE_threshold)}
     TE_without_ss_constraints = [constraint_weights, constraint_TE, constraint_short_sell_lim]
-    tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=TE_without_ss_constraints)
-    PB_3_1_weights = tmp.x
+    sol_3_1 = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=TE_without_ss_constraints)
+    PB_3_1_weights = sol_3_1.x
     PB_3_1_return.append(myf.prtf_return(PB_3_1_weights, montly_returns_tplus1))
     PB_3_1_alpha.append(PB_3_1_return[-1] - rf_tplus1[0])
 
     TE_with_ss_constraints = [constraint_weights, constraint_TE, constraint_short_sell]
-    tmp = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=TE_with_ss_constraints)
-    PB_4_1_weights = tmp.x
+    sol_4_1 = minimize(myf.tangency_objective, P5_weights, args=(rf[0], covariance_matrix, mu), method="SLSQP", constraints=TE_with_ss_constraints)
+    PB_4_1_weights = sol_4_1.x
     PB_4_1_return.append(myf.prtf_return(PB_4_1_weights, montly_returns_tplus1))
     PB_4_1_alpha.append(PB_4_1_return[-1] - rf_tplus1[0])
 
@@ -295,134 +295,140 @@ NAV_PB_4_2_return_OS3   = np.cumprod(1 + np.array(PB_4_2_return[idx_start_3-idx_
 
 #   NAV_P1_return,     Keeping this series in cmt as doesn't fit properly
 NAV = np.transpose([NAV_P1_return, NAV_P2_return, NAV_P3_return, NAV_P4_return, NAV_P5_return, NAV_P6_return, NAV_P7_return])
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+fig1 = plt.figure()
+axes1 = fig1.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_btst
 y = NAV
-axes.plot(x, y)
-axes.legend(["Prtf 1", "Prtf 2", "Prtf 3", "Prtf 4", "Prtf 5", "Prtf 6", "Prtf 7"])
-axes.set_xlabel('Dates')
-axes.set_ylabel('Prtf Value')
-axes.set_title('Portfolio values for the period July 1931 to December 2019')
-fig.show()
+axes1.plot(x, y)
+axes1.legend(["Prtf 1", "Prtf 2", "Prtf 3", "Prtf 4", "Prtf 5", "Prtf 6", "Prtf 7"])
+axes1.set_xlabel('Dates')
+axes1.set_ylabel('Prtf Value')
+axes1.set_title('Portfolio values for the period July 1931 to December 2019')
+fig1.show()
+fig1.savefig('7_Portfolios_OS1.png')
 
 
 #NAV_P1_return_OS2,
-NAV_OS2 = np.transpose([NAV_P2_return_OS2, NAV_P3_return_OS2, NAV_P4_return_OS2, NAV_P5_return_OS2, NAV_P6_return_OS2, NAV_P7_return_OS2])
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+NAV_OS2 = np.transpose([NAV_P1_return_OS2, NAV_P2_return_OS2, NAV_P3_return_OS2, NAV_P4_return_OS2, NAV_P5_return_OS2, NAV_P6_return_OS2, NAV_P7_return_OS2])
+fig2 = plt.figure()
+axes2 = fig2.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd2
 y = NAV_OS2
-axes.plot(x, y)
-axes.legend(["Prtf 2", "Prtf 3", "Prtf 4", "Prtf 5", "Prtf 6", "Prtf 7"])
-axes.set_xlabel('Dates')
-axes.set_ylabel('Prtf Value')
-axes.set_title('Portfolio values for the period January 1990 to December 2019')
-fig.show()
+axes2.plot(x, y)
+axes2.legend(["Prtf 1", "Prtf 2", "Prtf 3", "Prtf 4", "Prtf 5", "Prtf 6", "Prtf 7"])
+axes2.set_xlabel('Dates')
+axes2.set_ylabel('Prtf Value')
+axes2.set_title('Portfolio values for the period January 1990 to December 2019')
+fig2.show()
+fig2.savefig('7_Portfolios_OS2.png')
 
 #NAV_P1_return_OS3,
-NAV_OS3 = np.transpose([NAV_P2_return_OS3, NAV_P3_return_OS3, NAV_P4_return_OS3, NAV_P5_return_OS3, NAV_P6_return_OS3, NAV_P7_return_OS3])
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+NAV_OS3 = np.transpose([NAV_P1_return_OS3, NAV_P2_return_OS3, NAV_P3_return_OS3, NAV_P4_return_OS3, NAV_P5_return_OS3, NAV_P6_return_OS3, NAV_P7_return_OS3])
+fig3 = plt.figure()
+axes3 = fig3.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd3
 y = NAV_OS3
-axes.plot(x, y)
-axes.legend(["Prtf 2", "Prtf 3","Prtf 4","Prtf 5","Prtf 6","Prtf 7"])
-axes.set_xlabel('Dates')
-axes.set_ylabel('Prtf Value')
-axes.set_title('Portfolio values for the period January 2000 to December 2019')
-fig.show()
+axes3.plot(x, y)
+axes3.legend(["Prtf 1", "Prtf 2", "Prtf 3","Prtf 4","Prtf 5","Prtf 6","Prtf 7"])
+axes3.set_xlabel('Dates')
+axes3.set_ylabel('Prtf Value')
+axes3.set_title('Portfolio values for the period January 2000 to December 2019')
+fig3.show()
+fig3.savefig('7_Portfolios_OS3.png')
 
 
 # Graph of NAV of MC prtfs during enitre period
 #NAV_PB_3_1_return,     in legend   "Prtf B3: TE<1% without short-sale const",
-NAV_PartB_MC = np.transpose([NAV_P6_return, NAV_PB_4_1_return])
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+NAV_PartB_MC = np.transpose([NAV_P6_return, NAV_PB_3_1_return, NAV_PB_4_1_return])
+figvw1 = plt.figure()
+axesvw1 = figvw1.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_btst
 y = NAV_PartB_MC
-axes.plot(x, y)
-axes.legend(["Prtf 6: MC weighted", "Prtf B4: TE<1% with short-sale const"])
-axes.set_xlabel('Dates')
-axes.set_ylabel('Prtf Value')
-axes.set_title('Portfolio values for the period July 1931 to December 2019')
-fig.show()
-
+axesvw1.plot(x, y)
+axesvw1.legend(["Prtf 6: MC weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axesvw1.set_xlabel('Dates')
+axesvw1.set_ylabel('Prtf Value')
+axesvw1.set_title('Portfolio values for the period July 1931 to December 2019')
+figvw1.show()
+figvw1.savefig('VW_MV_OS1.png')
 
 # Graph of NAV of MC prtfs during 2rd period
 # NAV_PB_3_1_return_OS2, "Prtf B3: TE<1% without short-sale const",
-NAV_PartB_MC_OS2 = np.transpose([NAV_P6_return_OS2, NAV_PB_4_1_return_OS2])
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+NAV_PartB_MC_OS2 = np.transpose([NAV_P6_return_OS2, NAV_PB_3_1_return_OS2, NAV_PB_4_1_return_OS2])
+figvw2 = plt.figure()
+axesvw2 = figvw2.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd2
 y = NAV_PartB_MC_OS2
-axes.plot(x, y)
-axes.legend(["Prtf 6: MC weighted", "Prtf B4: TE<1% with short-sale const"])
-axes.set_xlabel('Dates')
-axes.set_ylabel('Prtf Value')
-axes.set_title('Portfolio values for the period January 1990 to December 2019')
-fig.show()
+axesvw2.plot(x, y)
+axesvw2.legend(["Prtf 6: MC weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axesvw2.set_xlabel('Dates')
+axesvw2.set_ylabel('Prtf Value')
+axesvw2.set_title('Portfolio values for the period January 1990 to December 2019')
+figvw2.show()
+figvw2.savefig('VW_MV_OS2.png')
 
 
 # Graph of NAV of MC prtfs during 3rd period
 # NAV_PB_3_1_return_OS3,   "Prtf B3: TE<1% without short-sale const",
-NAV_PartB_MC_OS3 = np.transpose([NAV_P6_return_OS3, NAV_PB_4_1_return_OS3])
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+NAV_PartB_MC_OS3 = np.transpose([NAV_P6_return_OS3, NAV_PB_3_1_return_OS3, NAV_PB_4_1_return_OS3])
+figvw3 = plt.figure()
+axesvw3 = figvw3.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd3
 y = NAV_PartB_MC_OS3
-axes.plot(x, y)
-axes.legend(["Prtf 6: MC weighted", "Prtf B4: TE<1% with short-sale const"])
-axes.set_xlabel('Dates')
-axes.set_ylabel('Prtf Value')
-axes.set_title('Portfolio values for the period January 2000 to December 2019')
-fig.show()
+axesvw3.plot(x, y)
+axesvw3.legend(["Prtf 6: MC weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axesvw3.set_xlabel('Dates')
+axesvw3.set_ylabel('Prtf Value')
+axesvw3.set_title('Portfolio values for the period January 2000 to December 2019')
+figvw3.show()
+figvw3.savefig('VW_MV_OS3.png')
 
 
 # Graph of NAV of EQW prtfs during enitre period
 #NAV_PB_3_2_return,     in legend   "Prtf B3: TE<1% without short-sale const",
 NAV_PartB_EQW = np.transpose([NAV_P5_return, NAV_PB_3_2_return, NAV_PB_4_2_return])
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+figeqw1 = plt.figure()
+axeseqw1 = figeqw1.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_btst
 y = NAV_PartB_EQW
-axes.plot(x, y)
-axes.legend(["Prtf 5: EQW weighted", "Prtf B3: TE<1% without short-sale const","Prtf B4: TE<1% with short-sale const"])
-axes.set_xlabel('Dates')
-axes.set_ylabel('Prtf Value')
-axes.set_title('Portfolio values for the period July 1931 to December 2019')
-fig.show()
+axeseqw1.plot(x, y)
+axeseqw1.legend(["Prtf 5: EQW weighted", "Prtf B3: TE<1% without short-sale const","Prtf B4: TE<1% with short-sale const"])
+axeseqw1.set_xlabel('Dates')
+axeseqw1.set_ylabel('Prtf Value')
+axeseqw1.set_title('Portfolio values for the period July 1931 to December 2019')
+figeqw1.show()
+figeqw1.savefig('EQW_OS1.png')
 
 
-# Graph of NAV of MC prtfs during 2rd period
+# Graph of NAV of EQW prtfs during 2rd period
 # NAV_PB_3_2_return_OS2, "Prtf B3: TE<1% without short-sale const",
-NAV_PartB_EQW_OS2 = np.transpose([NAV_P5_return_OS2, NAV_PB_4_2_return_OS2])
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+NAV_PartB_EQW_OS2 = np.transpose([NAV_P5_return_OS2, NAV_PB_3_2_return_OS2, NAV_PB_4_2_return_OS2])
+figeqw2 = plt.figure()
+axeseqw2 = figeqw2.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd2
 y = NAV_PartB_EQW_OS2
-axes.plot(x, y)
-axes.legend(["Prtf 5: EQW weighted", "Prtf B4: TE<1% with short-sale const"])
-axes.set_xlabel('Dates')
-axes.set_ylabel('Prtf Value')
-axes.set_title('Portfolio values for the period January 1990 to December 2019')
-fig.show()
+axeseqw2.plot(x, y)
+axeseqw2.legend(["Prtf 5: EQW weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axeseqw2.set_xlabel('Dates')
+axeseqw2.set_ylabel('Prtf Value')
+axeseqw2.set_title('Portfolio values for the period January 1990 to December 2019')
+figeqw2.show()
+figeqw2.savefig('EQW_OS2.png')
 
-
-# Graph of NAV of MC prtfs during 3rd period
+# Graph of NAV of EQW prtfs during 3rd period
 # NAV_PB_3_2_return_OS3,   "Prtf B3: TE<1% without short-sale const",
-NAV_PartB_EQW_OS3 = np.transpose([NAV_P5_return_OS3, NAV_PB_4_2_return_OS3])
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
-x=date_vec_prd3
+NAV_PartB_EQW_OS3 = np.transpose([NAV_P5_return_OS3, NAV_PB_3_2_return_OS3, NAV_PB_4_2_return_OS3])
+figeqw3 = plt.figure()
+axeseqw3 = figeqw3.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+x = date_vec_prd3
 y = NAV_PartB_EQW_OS3
-axes.plot(x, y)
-axes.legend(["Prtf 5: EQW weighted", "Prtf B4: TE<1% with short-sale const"])
-axes.set_xlabel('Dates')
-axes.set_ylabel('Prtf Value')
-axes.set_title('Portfolio values for the period January 2000 to December 2019')
-fig.show()
-
+axeseqw3.plot(x, y)
+axeseqw3.legend(["Prtf 5: EQW weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axeseqw3.set_xlabel('Dates')
+axeseqw3.set_ylabel('Prtf Value')
+axeseqw3.set_title('Portfolio values for the period January 2000 to December 2019')
+figeqw3.show()
+figeqw3.savefig('EQW_OS3.png')
 
 
 ## ---------- Part B ----------------------------------------------------------
