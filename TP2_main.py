@@ -207,43 +207,43 @@ for date in date_vec_btst:
 
 
 # Computing and comparing performance Sharpe Ratios accross periods
-P1_SR_OS1               = np.asarray(P1_alpha).mean() / np.std(np.asarray(P1_alpha))
-P2_SR_OS1               = np.asarray(P2_alpha).mean() / np.std(np.asarray(P2_alpha))
-P3_SR_OS1               = np.asarray(P3_alpha).mean() / np.std(np.asarray(P3_alpha))
-P4_SR_OS1               = np.asarray(P4_alpha).mean() / np.std(np.asarray(P4_alpha))
-P5_SR_OS1               = np.asarray(P5_alpha).mean() / np.std(np.asarray(P5_alpha))
-P6_SR_OS1               = np.asarray(P6_alpha).mean() / np.std(np.asarray(P6_alpha))
-P7_SR_OS1               = np.asarray(P7_alpha).mean() / np.std(np.asarray(P7_alpha))
-PB_3_1_SR_OS1           = np.asarray(PB_3_1_alpha).mean() / np.std(np.asarray(PB_3_1_alpha))
-PB_3_2_SR_OS1           = np.asarray(PB_3_2_alpha).mean() / np.std(np.asarray(PB_3_2_alpha))
-PB_4_1_SR_OS1           = np.asarray(PB_4_1_alpha).mean() / np.std(np.asarray(PB_4_1_alpha))
-PB_4_2_SR_OS1           = np.asarray(PB_4_2_alpha).mean() / np.std(np.asarray(PB_4_2_alpha))
+P1_SR_OS1               = np.asarray(P1_alpha).mean() / np.std(np.asarray(P1_return))
+P2_SR_OS1               = np.asarray(P2_alpha).mean() / np.std(np.asarray(P2_return))
+P3_SR_OS1               = np.asarray(P3_alpha).mean() / np.std(np.asarray(P3_return))
+P4_SR_OS1               = np.asarray(P4_alpha).mean() / np.std(np.asarray(P4_return))
+P5_SR_OS1               = np.asarray(P5_alpha).mean() / np.std(np.asarray(P5_return))
+P6_SR_OS1               = np.asarray(P6_alpha).mean() / np.std(np.asarray(P6_return))
+P7_SR_OS1               = np.asarray(P7_alpha).mean() / np.std(np.asarray(P7_return))
+PB_3_1_SR_OS1           = np.asarray(PB_3_1_alpha).mean() / np.std(np.asarray(PB_3_1_return))
+PB_3_2_SR_OS1           = np.asarray(PB_3_2_alpha).mean() / np.std(np.asarray(PB_3_2_return))
+PB_4_1_SR_OS1           = np.asarray(PB_4_1_alpha).mean() / np.std(np.asarray(PB_4_1_return))
+PB_4_2_SR_OS1           = np.asarray(PB_4_2_alpha).mean() / np.std(np.asarray(PB_4_2_return))
 
 
-P1_SR_OS2               = np.asarray(P1_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P1_alpha[idx_start_2-idx_start_1:]))
-P2_SR_OS2               = np.asarray(P2_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P2_alpha[idx_start_2-idx_start_1:]))
-P3_SR_OS2               = np.asarray(P3_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P3_alpha[idx_start_2-idx_start_1:]))
-P4_SR_OS2               = np.asarray(P4_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P4_alpha[idx_start_2-idx_start_1:]))
-P5_SR_OS2               = np.asarray(P5_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P5_alpha[idx_start_2-idx_start_1:]))
-P6_SR_OS2               = np.asarray(P6_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P6_alpha[idx_start_2-idx_start_1:]))
-P7_SR_OS2               = np.asarray(P7_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P7_alpha[idx_start_2-idx_start_1:]))
-PB_3_1_SR_OS2           = np.asarray(PB_3_1_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(PB_3_1_alpha[idx_start_2-idx_start_1:]))
-PB_3_2_SR_OS2           = np.asarray(PB_3_2_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(PB_3_2_alpha[idx_start_2-idx_start_1:]))
-PB_4_1_SR_OS2           = np.asarray(PB_4_1_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(PB_4_1_alpha[idx_start_2-idx_start_1:]))
-PB_4_2_SR_OS2           = np.asarray(PB_4_2_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(PB_4_2_alpha[idx_start_2-idx_start_1:]))
+P1_SR_OS2               = np.asarray(P1_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P1_return[idx_start_2-idx_start_1:]))
+P2_SR_OS2               = np.asarray(P2_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P2_return[idx_start_2-idx_start_1:]))
+P3_SR_OS2               = np.asarray(P3_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P3_return[idx_start_2-idx_start_1:]))
+P4_SR_OS2               = np.asarray(P4_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P4_return[idx_start_2-idx_start_1:]))
+P5_SR_OS2               = np.asarray(P5_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P5_return[idx_start_2-idx_start_1:]))
+P6_SR_OS2               = np.asarray(P6_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P6_return[idx_start_2-idx_start_1:]))
+P7_SR_OS2               = np.asarray(P7_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(P7_return[idx_start_2-idx_start_1:]))
+PB_3_1_SR_OS2           = np.asarray(PB_3_1_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(PB_3_1_return[idx_start_2-idx_start_1:]))
+PB_3_2_SR_OS2           = np.asarray(PB_3_2_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(PB_3_2_return[idx_start_2-idx_start_1:]))
+PB_4_1_SR_OS2           = np.asarray(PB_4_1_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(PB_4_1_return[idx_start_2-idx_start_1:]))
+PB_4_2_SR_OS2           = np.asarray(PB_4_2_alpha[idx_start_2-idx_start_1:]).mean() / np.std(np.asarray(PB_4_2_return[idx_start_2-idx_start_1:]))
 
 
-P1_SR_OS3               = np.asarray(P1_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P1_alpha[idx_start_3-idx_start_1:]))
-P2_SR_OS3               = np.asarray(P2_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P2_alpha[idx_start_3-idx_start_1:]))
-P3_SR_OS3               = np.asarray(P3_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P3_alpha[idx_start_3-idx_start_1:]))
-P4_SR_OS3               = np.asarray(P4_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P4_alpha[idx_start_3-idx_start_1:]))
-P5_SR_OS3               = np.asarray(P5_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P5_alpha[idx_start_3-idx_start_1:]))
-P6_SR_OS3               = np.asarray(P6_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P6_alpha[idx_start_3-idx_start_1:]))
-P7_SR_OS3               = np.asarray(P7_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P7_alpha[idx_start_3-idx_start_1:]))
-PB_3_1_SR_OS3           = np.asarray(PB_3_1_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(PB_3_1_alpha[idx_start_3-idx_start_1:]))
-PB_3_2_SR_OS3           = np.asarray(PB_3_2_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(PB_3_2_alpha[idx_start_3-idx_start_1:]))
-PB_4_1_SR_OS3           = np.asarray(PB_4_1_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(PB_4_1_alpha[idx_start_3-idx_start_1:]))
-PB_4_2_SR_OS3           = np.asarray(PB_4_2_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(PB_4_2_alpha[idx_start_3-idx_start_1:]))
+P1_SR_OS3               = np.asarray(P1_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P1_return[idx_start_3-idx_start_1:]))
+P2_SR_OS3               = np.asarray(P2_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P2_return[idx_start_3-idx_start_1:]))
+P3_SR_OS3               = np.asarray(P3_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P3_return[idx_start_3-idx_start_1:]))
+P4_SR_OS3               = np.asarray(P4_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P4_return[idx_start_3-idx_start_1:]))
+P5_SR_OS3               = np.asarray(P5_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P5_return[idx_start_3-idx_start_1:]))
+P6_SR_OS3               = np.asarray(P6_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P6_return[idx_start_3-idx_start_1:]))
+P7_SR_OS3               = np.asarray(P7_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(P7_return[idx_start_3-idx_start_1:]))
+PB_3_1_SR_OS3           = np.asarray(PB_3_1_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(PB_3_1_return[idx_start_3-idx_start_1:]))
+PB_3_2_SR_OS3           = np.asarray(PB_3_2_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(PB_3_2_return[idx_start_3-idx_start_1:]))
+PB_4_1_SR_OS3           = np.asarray(PB_4_1_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(PB_4_1_return[idx_start_3-idx_start_1:]))
+PB_4_2_SR_OS3           = np.asarray(PB_4_2_alpha[idx_start_3-idx_start_1:]).mean() / np.std(np.asarray(PB_4_2_return[idx_start_3-idx_start_1:]))
 
 # Presenting SR in a table
 test_array  = [[P1_SR_OS1, P1_SR_OS2, P1_SR_OS3], [P2_SR_OS1, P2_SR_OS2, P2_SR_OS3], [P3_SR_OS1, P3_SR_OS2, P3_SR_OS3], [P4_SR_OS1, P4_SR_OS2, P4_SR_OS3], [P5_SR_OS1, P5_SR_OS2, P5_SR_OS3], [P6_SR_OS1, P6_SR_OS2, P6_SR_OS3], [P7_SR_OS1, P7_SR_OS2, P7_SR_OS3],[PB_3_1_SR_OS1, PB_3_1_SR_OS2, PB_3_1_SR_OS3],[PB_3_2_SR_OS1, PB_3_2_SR_OS2, PB_3_2_SR_OS3],[PB_4_1_SR_OS1, PB_4_1_SR_OS2, PB_4_1_SR_OS3],[PB_4_2_SR_OS1, PB_4_2_SR_OS2, PB_4_2_SR_OS3]]
@@ -436,14 +436,23 @@ figeqw3.savefig('EQW_OS3.png')
 
 ## ---------- Part_B #5 #6 #7 #8 ----------------------------------------------------------
 
+# Calculating the portfolio characteristics for the all period T and not just for the OS period
 
-# Calculating the portfolio characteristics for the all period and not just for the OS period
-Size_MC     = []
-Value_BM    = []
-Momentum    = []
+Size_MC         = all_avg_firm_size * all_num_firms
 
-Size_MC.append(all_avg_firm_size * all_num_firms)
-
-Value_BM.append("1")
+Value_BM        = sum_BE_div_sum_ME.loc[sum_BE_div_sum_ME.index.repeat(12)]
+Value_BM        = Value_BM.iloc[:-5, :]
+Value_BM.index  = Size_MC.index
 
 
+Momentum        = all_monthly_returns.rolling(12, min_periods=1).mean()
+
+#-------------------------------------------------------------------------------------------
+# Recalculating the benchmark porfolio weights by Market Cap
+Total_Mrkt_Caps     = []    # Total_Mrkt_Caps   T x 1
+Bench_MC_weights    = []    # Total_Mrkt_Caps   T x 10
+
+for dates in Size_MC.index:
+    Total_Mrkt_Caps.append(all_avg_firm_size.loc[dates, :] @ all_num_firms.loc[dates, :])
+    den = pd.DataFrame(Total_Mrkt_Caps).iloc[-1][0]
+    Bench_MC_weights.append(Size_MC.loc[dates, :].div(den))
