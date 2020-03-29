@@ -436,8 +436,11 @@ figeqw3.savefig('EQW_OS3.png')
 
 ## ---------- Part_B #5 #6 #7 #8 ----------------------------------------------------------
 
-# Calculating the portfolio characteristics for the all period T and not just for the OS period
+# Parameters for Part B
+risk_aversion = 5
 
+
+# Calculating the portfolio characteristics for the all period T and not just for the OS period
 Size_MC         = all_avg_firm_size * all_num_firms
 
 Value_BM        = sum_BE_div_sum_ME.loc[sum_BE_div_sum_ME.index.repeat(12)]
@@ -470,8 +473,10 @@ for dates in Size_MC.index:
 # Value_BM = Value_BM[:-1, :]
 # Momentum = Momentum[:-1, :]
 
+
+
 #fun = myf.objective_8([0.4, 0.4, 0.2], Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
-fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns),
+fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns, risk_aversion),
                method="SLSQP")
 
 Theta = fun.x

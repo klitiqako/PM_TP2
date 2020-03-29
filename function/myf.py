@@ -252,7 +252,7 @@ def prtf_return(weights, industry_returns):
 # standardize charact -- done
 # add constraint on weights -- done
 
-def objective_8(theta, w_bar, x1, x2, x3, monthly_ret):
+def objective_8(theta, w_bar, x1, x2, x3, monthly_ret, gamma):
     # Transforming data to numpy array as quicker to compute than dataframes
     w_bar = np.asarray(w_bar)
     x1 = x1.to_numpy()
@@ -285,11 +285,11 @@ def objective_8(theta, w_bar, x1, x2, x3, monthly_ret):
     sum_weight = sum_weight[np.newaxis]
     opt_weight = opt_weight / sum_weight.T
 
-    ret_i_t = opt_weight * monthly_ret
+    ret_i_t = opt_weight * ( monthly_ret / 100)
 
     ret_t = np.sum(ret_i_t, axis=1)         # summing over the col
 
-    utility = ((1 + ret_t) ** (1-5)) / (1 - 5)
+    utility = ((1 + ret_t) ** (1 - gamma)) / (1 - gamma)
 
     f = np.mean(utility)
 
