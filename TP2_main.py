@@ -458,17 +458,17 @@ for dates in Size_MC.index:
     Bench_MC_weights.append(Size_MC.loc[dates, :].div(den))
 
 # Transforming data to numpy array as quicker to compute than dataframes
-Bench_MC_weights = np.asarray(Bench_MC_weights)
-Size_MC = Size_MC.to_numpy()
-Value_BM = Value_BM.to_numpy()
-Momentum = Momentum.to_numpy()
-all_monthly_returns = all_monthly_returns.to_numpy()
-
-all_monthly_returns = all_monthly_returns[1:,:]            # removing first month of returns (since we sum starting at t=1)
-w_bar = w_bar[:-1,:]             # removing last month of weights (since summed to T-1)
-Size_MC = Size_MC[:-1, :]
-Value_BM = Value_BM[:-1, :]
-Momentum = Momentum[:-1, :]
+# Bench_MC_weights = np.asarray(Bench_MC_weights)
+# Size_MC = Size_MC.to_numpy()
+# Value_BM = Value_BM.to_numpy()
+# Momentum = Momentum.to_numpy()
+# all_monthly_returns = all_monthly_returns.to_numpy()
+#
+# all_monthly_returns = all_monthly_returns[1:,:]            # removing first month of returns (since we sum starting at t=1)
+# Bench_MC_weights = Bench_MC_weights[:-1,:]                 # removing last month of weights (since summed to T-1)
+# Size_MC = Size_MC[:-1, :]
+# Value_BM = Value_BM[:-1, :]
+# Momentum = Momentum[:-1, :]
 
 #fun = myf.objective_8([0.4, 0.4, 0.2], Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
 fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns),
@@ -476,5 +476,7 @@ fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_MC_weights, Size_MC
 
 Theta = fun.x
 print(Theta)
+
+P8_weights = myf.prtf8(Theta, Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
 
 print(True)
