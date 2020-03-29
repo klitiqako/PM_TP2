@@ -165,8 +165,8 @@ end_date = pd.to_datetime(datetime.datetime(2020, 1, 1))
 
 date_vec = df_Returns.index[(df_Returns.index >= start_date)&(df_Returns.index <= end_date)]
 
-num_long = 5
-num_short = 5
+num_long = 20
+num_short = 20
 
 # 1 : Long low characteristic and short high characteristic
 # -1 : Long high characteristic and short low characteristic
@@ -259,40 +259,51 @@ plt.show()
 
 
 ## Performance calculation
+# Input: DataFrame of returns according to each strategies
 
 
+period1 = [pd.to_datetime(datetime.datetime(1963, 7, 31)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
+period2 = [pd.to_datetime(datetime.datetime(1990, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
+period3 = [pd.to_datetime(datetime.datetime(2000, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
+period = [period1, period2, period3]
 
-performance_measure_type = ['Sharpe_Ratio', 'Fama_3', 'Fama_4', 'Fama_5']
-nb_factor = [1, 4, 5, 6]
-factor = ['alpha', 'Mkt-RF', 'SMB', 'HML', 'RMW', 'CMA']
-performance_measure = {}
-for s in strat:
-    performance_measure[s] = pd.DataFrame(np.zeros((len(factor), len(performance_measure_type))))
-    performance_measure[s].columns = performance_measure_type
-    performance_measure[s].index = factor
-
-for s in strat:
-    print(s)
-    for i, p in enumerate(performance_measure_type):
-        factor_tmp = factor[:nb_factor[i]]
-        if p == 'Sharpe_Ratio':
-            # Sharpe Ratio: Excess Return / Standard deviation
-            tmp = returns.loc[:,s].subtract(df_Fama_3.loc[date_vec, 'RF']).mean() / returns.loc[:,s].std()
-            
-        else: #Fama French
-            #Excess Return
-            Y = np.array(returns.loc[:,s].subtract(df_Fama_3.loc[date_vec, 'RF']))
-            if p == 'Fama_3':
-                X = df_Fama_3.loc[date_vec, factor_tmp[1:]]
-            else: # Fama_4 and Fama_5
-                X = df_Fama_5.loc[date_vec, factor_tmp[1:]]
-           
-            X = sm.add_constant(X)
-            tmp = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
-
-        performance_measure[s].loc[factor_tmp,p] = tmp
-
-    print(performance_measure[s])
+for subperiod in period:
+    start_date = subperiod[0]
+    end_date = subperiod[1]
+    date_vec_tmp = df_Returns.index[(df_Returns.index >= start_date)&(df_Returns.index <= end_date)]
+    returns_tmp = returns.loc[date_vec_tmp, :]
+    strat = returns.columns
+    performance_measure_type = ['Sharpe_Ratio', 'Fama_3', 'Fama_4', 'Fama_5']
+    nb_factor = [1, 4, 5, 6]
+    factor = ['alpha', 'Mkt-RF', 'SMB', 'HML', 'RMW', 'CMA']
+    performance_measure = {}
+    for s in strat:
+        performance_measure[s] = pd.DataFrame(np.zeros((len(factor), len(performance_measure_type))))
+        performance_measure[s].columns = performance_measure_type
+        performance_measure[s].index = factor
+    
+    for s in strat:
+        print(s, subperiod)
+        for i, p in enumerate(performance_measure_type):
+            factor_tmp = factor[:nb_factor[i]]
+            if p == 'Sharpe_Ratio':
+                # Sharpe Ratio: Excess Return / Standard deviation
+                tmp = returns_tmp.loc[:,s].subtract(df_Fama_3.loc[date_vec_tmp, 'RF']).mean() / returns_tmp.loc[:,s].std()
+                
+            else: #Fama French
+                #Excess Return
+                Y = np.array(returns_tmp.loc[:,s].subtract(df_Fama_3.loc[date_vec_tmp, 'RF']))
+                if p == 'Fama_3':
+                    X = df_Fama_3.loc[date_vec_tmp, factor_tmp[1:]]
+                else: # Fama_4 and Fama_5
+                    X = df_Fama_5.loc[date_vec_tmp, factor_tmp[1:]]
+               
+                X = sm.add_constant(X)
+                tmp = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
+    
+            performance_measure[s].loc[factor_tmp,p] = tmp
+    
+        print(performance_measure[s])
 
 
 
