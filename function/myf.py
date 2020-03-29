@@ -248,40 +248,23 @@ def prtf_return(weights, industry_returns):
 
 ##----- Part B, Q 8  Replicating Parametric Paper
 
-# ## -----Optimal Portfolios weights at time t parametrized as a function of Theta ----- ##
-# def opt_prtf_w(bench_mc_w, bench_eqw_w, size_MC, salue_BM, momentum, time_t, eqw_bench=False):
-#     if eqw_bench=True:
-#         bench_w = bench_eqw_w
-#     else:
-#         bench_w = bench_mc_w
-#
-#
-#     return opt_w
-#
-# ## -----Investor's Utility function CRRA ----- ##
-# def utility_CRRA(prt_ret, rra_factor):
-#     return ((1 + prt_ret) ** (1 - rra_factor) ) / (1 - rra_factor)
-
-
-# Nt = 10 industries
-# T = 1123 months
-# Theta = [] 1 x 3
-# x1, x2, x3        # T x 10
-# r                 # T x 10 monthly returns
-# Theta_x           T * 10
-
-
-# TO DO fix r t+1
-# standardize charact
-# add constraint on weights
+# TO DO fix r t+1 -- done
+# standardize charact -- done
+# add constraint on weights -- done
 
 def objective_8(theta, w_bar, x1, x2, x3, monthly_ret):
-    # Transforming data to numpy array as quicker to compute than dataframes
-    w_bar = np.asarray(w_bar)
-    x1 = x1.to_numpy()
-    x2 = x2.to_numpy()
-    x3 = x3.to_numpy()
-    monthly_ret = monthly_ret.to_numpy()
+    # # Transforming data to numpy array as quicker to compute than dataframes
+    # w_bar = np.asarray(w_bar)
+    # x1 = x1.to_numpy()
+    # x2 = x2.to_numpy()
+    # x3 = x3.to_numpy()
+    # monthly_ret = monthly_ret.to_numpy()
+    #
+    # monthly_ret = monthly_ret[1:,:]            # removing first month of returns (since we sum starting at t=1)
+    # w_bar = w_bar[:-1,:]             # removing last month of weights (since summed to T-1)
+    # x1 = x1[:-1, :]
+    # x2 = x2[:-1, :]
+    # x3 = x3[:-1, :]
 
     # Standardizing characteristics crosssectionally (accross columns)
     x1 = stats.zscore(x1, axis=1)
@@ -297,6 +280,11 @@ def objective_8(theta, w_bar, x1, x2, x3, monthly_ret):
 
     opt_weight = w_bar + theta_x
 
+    opt_weight[opt_weight < 0] = 0
+    sum_weight = np.sum(opt_weight, axis=1)
+    sum_weight = sum_weight[np.newaxis]
+    opt_weight = opt_weight / sum_weight.T
+
     ret_i_t = opt_weight * monthly_ret
 
     ret_t = np.sum(ret_i_t, axis=1)         # summing over the col
@@ -305,5 +293,4 @@ def objective_8(theta, w_bar, x1, x2, x3, monthly_ret):
 
     f = np.mean(utility)
 
-
-    return(f)
+    return(-f)

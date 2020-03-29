@@ -33,9 +33,9 @@ start_date_3        = "2000-01-01"
 end_date            = "2020-01-01"
 
 #To test shorter period
-start_date_2        = "1934-01-01"
-start_date_3        = "1936-01-01"
-end_date            = "1938-01-01"
+start_date_2        = "1933-01-01"
+start_date_3        = "1934-01-01"
+end_date            = "1935-01-01"
 
 
 idx_start_1         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_1)
@@ -457,7 +457,24 @@ for dates in Size_MC.index:
     den = pd.DataFrame(Total_Mrkt_Caps).iloc[-1][0]
     Bench_MC_weights.append(Size_MC.loc[dates, :].div(den))
 
-fun = myf.objective_8([0.4, 0.4, 0.2], Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
-print(fun)
+# Transforming data to numpy array as quicker to compute than dataframes
+Bench_MC_weights = np.asarray(Bench_MC_weights)
+Size_MC = Size_MC.to_numpy()
+Value_BM = Value_BM.to_numpy()
+Momentum = Momentum.to_numpy()
+all_monthly_returns = all_monthly_returns.to_numpy()
+
+all_monthly_returns = all_monthly_returns[1:,:]            # removing first month of returns (since we sum starting at t=1)
+w_bar = w_bar[:-1,:]             # removing last month of weights (since summed to T-1)
+Size_MC = Size_MC[:-1, :]
+Value_BM = Value_BM[:-1, :]
+Momentum = Momentum[:-1, :]
+
+#fun = myf.objective_8([0.4, 0.4, 0.2], Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
+fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns),
+               method="SLSQP")
+
+Theta = fun.x
+print(Theta)
 
 print(True)
