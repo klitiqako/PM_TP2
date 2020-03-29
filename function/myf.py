@@ -6,7 +6,7 @@ Created on Fri Jan 17 22:52:32 2020
 import numpy as np
 import random
 from scipy.optimize import minimize
-
+from scipy import stats
 
 ## ----- Min variance portfolio by mimimizing the variance ----- ##
 def objective(weights_vector, covariance_matrix):
@@ -271,11 +271,39 @@ def prtf_return(weights, industry_returns):
 # Theta_x           T * 10
 
 
+# TO DO fix r t+1
+# standardize charact
+# add constraint on weights
+
+def objective_8(theta, w_bar, x1, x2, x3, monthly_ret):
+    # Transforming data to numpy array as quicker to compute than dataframes
+    w_bar = np.asarray(w_bar)
+    x1 = x1.to_numpy()
+    x2 = x2.to_numpy()
+    x3 = x3.to_numpy()
+    monthly_ret = monthly_ret.to_numpy()
+
+    # Standardizing characteristics crosssectionally (accross columns)
+    x1 = stats.zscore(x1, axis=1)
+    x2 = stats.zscore(x1, axis=1)
+    x3 = stats.zscore(x1, axis=1)
+
+    theta_x1 = x1 * theta[0]
+    theta_x2 = x2 * theta[1]
+    theta_x3 = x3 * theta[2]
+
+    theta_x = theta_x1 + theta_x2 + theta_x3
+    theta_x = theta_x / 10
+
+    opt_weight = w_bar + theta_x
+
+    ret_i_t = opt_weight * monthly_ret
+
+    ret_t = np.sum(ret_i_t, axis=1)         # summing over the col
+
+    utility = ((1 + ret_t) ** (1-5)) / (1 - 5)
+
+    f = np.mean(utility)
 
 
-def objective_8 (Theta, x1, x2, x3 ):
-    Theta_x1 = x1 * Theta[0]
-    Theta_x2 = x2 * Theta[1]
-    Theta_x3 = x3 * Theta[2]
-
-    Theta_x = Theta_x1 + Theta_x2 + Theta_x3
+    return(f)

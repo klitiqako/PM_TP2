@@ -456,3 +456,8 @@ for dates in Size_MC.index:
     Total_Mrkt_Caps.append(all_avg_firm_size.loc[dates, :] @ all_num_firms.loc[dates, :])
     den = pd.DataFrame(Total_Mrkt_Caps).iloc[-1][0]
     Bench_MC_weights.append(Size_MC.loc[dates, :].div(den))
+
+fun = myf.objective_8([0.4, 0.4, 0.2], Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
+print(fun)
+
+print(True)
