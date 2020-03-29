@@ -165,8 +165,8 @@ end_date = pd.to_datetime(datetime.datetime(2020, 1, 1))
 
 date_vec = df_Returns.index[(df_Returns.index >= start_date)&(df_Returns.index <= end_date)]
 
-num_long = 20
-num_short = 20
+num_long = 5
+num_short = 5
 
 # 1 : Long low characteristic and short high characteristic
 # -1 : Long high characteristic and short low characteristic
@@ -175,7 +175,7 @@ strat = ['BAB', 'Low Vol', 'HML', 'SMB', 'MOM']
 characteristic_tmp = {'BAB': betas, 'Low Vol':Idio_vol, 'HML':Book_to_Mkt_C, 'SMB': Market_cap_C, 'MOM': Momentum_C}
 long_short.index = strat
 
-weight_type = 'Rank' # Equal, Market_cap or Rank
+weight_type = 'Market_cap' # Equal, Market_cap or Rank
 
 # Variable
 df_Returns_tplus1 = df_Returns.shift(-1)
@@ -247,7 +247,7 @@ for date, Nav in NAV.iterrows():
 
 
   
-market = df_Fama_3.loc[:,'Mkt-RF'] + df_Fama_3.loc[:,'RF']
+market = df_Fama_3.loc[date_vec,'Mkt-RF'] + df_Fama_3.loc[date_vec,'RF']
 NAV_market = np.cumprod(1 + market[market.index > '1963-01-31'] / 100)    
 for characteristic_name in strat:
     plt.plot(NAV.loc[:,characteristic_name], label = characteristic_name)
@@ -266,6 +266,7 @@ period1 = [pd.to_datetime(datetime.datetime(1963, 7, 31)) , pd.to_datetime(datet
 period2 = [pd.to_datetime(datetime.datetime(1990, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
 period3 = [pd.to_datetime(datetime.datetime(2000, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
 period = [period1, period2, period3]
+
 
 for subperiod in period:
     start_date = subperiod[0]
