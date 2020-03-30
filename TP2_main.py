@@ -458,7 +458,7 @@ Momentum        = all_monthly_returns.rolling(12, min_periods=1).mean()
 
 #-------------------------------------------------------------------------------------------
 # Recalculating the benchmark porfolios weights
-Bench_EQW_weights = np.full((60,10),0.1)
+Bench_EQW_weights = np.full((rolling_window,10),0.1)
 Total_Mrkt_Caps     = []    # Total_Mrkt_Caps   T x 1
 Bench_MC_weights    = []    # Total_Mrkt_Caps   T x 10
 
@@ -467,7 +467,8 @@ for dates in Size_MC.index:
     den = pd.DataFrame(Total_Mrkt_Caps).iloc[-1][0]
     Bench_MC_weights.append(Size_MC.loc[dates, :].div(den))
 
-OS_period = Value_BM.index.loc["1963-07-01":, :]
+
+OS_period = Value_BM.index["1963-07-01" <= Value_BM.index]
 Theta_mc = np.empty()
 Theta_eqw = np.empty()
 P8_MC_weights = np.empty()
@@ -476,7 +477,7 @@ P8_EQW_weights = np.empty()
 P8_EQW_return = np.empty()
 
 for dates in OS_period:
-    idx_date = list(Value_BM.index.strftime("%Y-%m-%d")).index(dates)
+    idx_date = Value_BM.index.strftime("%Y-%m-%d").index(dates)
     Bench_MC_weights_IS = Bench_MC_weights.iloc[idx_date-rolling_window:idx_date-1]
     Size_MC_IS =  Size_MC.iloc[idx_date-rolling_window:idx_date-1]
     Value_BM_IS =  Value_BM.iloc[idx_date-rolling_window:idx_date-1]
