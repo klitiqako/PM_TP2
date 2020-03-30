@@ -5,6 +5,7 @@ Created on Fri Jan 17 22:52:32 2020
 """
 import numpy as np
 import random
+import pandas as pd
 from scipy.optimize import minimize
 from scipy import stats
 
@@ -328,3 +329,25 @@ def prtf8(theta, w_bar, x1, x2, x3, monthly_ret):
     ret_t = np.sum(ret_i_t, axis=1)  # summing over the col
 
     return opt_weight, ret_t
+
+
+import datetime
+
+def last_day_of_month(any_day):
+    next_month = any_day.replace(day=28) + datetime.timedelta(days=4)  # this will never fail
+    out = next_month - datetime.timedelta(days=next_month.day)
+    return out
+
+def eomonth(date_vec):
+    tmp = date_vec.date
+    out = []
+    for i in  range(len(date_vec)):
+        out.append(last_day_of_month(tmp[i]))
+    return pd.to_datetime(out)
+
+def midyearfama(date_vec):
+    tmp = date_vec
+    out = []
+    for i in  range(len(date_vec)):
+        out.append(datetime.datetime(tmp.year[i], 7, 31))
+    return pd.to_datetime(out)
