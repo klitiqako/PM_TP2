@@ -33,9 +33,9 @@ start_date_3        = "2000-01-01"
 end_date            = "2020-01-01"
 
 #To test shorter period
-start_date_2        = "1933-01-01"
-start_date_3        = "1934-01-01"
-end_date            = "1935-01-01"
+#start_date_2        = "1933-01-01"
+#start_date_3        = "1934-01-01"
+#end_date            = "1935-01-01"
 
 
 idx_start_1         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_1)
@@ -299,10 +299,12 @@ NAV_PB_4_2_return_OS3   = np.cumprod(1 + np.array(PB_4_2_return[idx_start_3-idx_
 #   NAV_P1_return,     Keeping this series in cmt as doesn't fit properly
 NAV = np.transpose([NAV_P1_return, NAV_P2_return, NAV_P3_return, NAV_P4_return, NAV_P5_return, NAV_P6_return, NAV_P7_return])
 fig1 = plt.figure()
-axes1 = fig1.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
-x = date_vec_btst
-y = NAV
-axes1.plot(x, y)
+axes1 = fig1.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+NAV = pd.DataFrame(NAV, index=date_vec_btst)
+#x = date_vec_btst
+#y = NAV
+#axes1.plot(x, y)
+axes1.plot(NAV)
 axes1.legend(["Prtf 1", "Prtf 2", "Prtf 3", "Prtf 4", "Prtf 5", "Prtf 6", "Prtf 7"])
 axes1.set_xlabel('Dates')
 axes1.set_ylabel('Prtf Value')
@@ -314,7 +316,7 @@ fig1.savefig('7_Portfolios_OS1.png')
 #NAV_P1_return_OS2,
 NAV_OS2 = np.transpose([NAV_P1_return_OS2, NAV_P2_return_OS2, NAV_P3_return_OS2, NAV_P4_return_OS2, NAV_P5_return_OS2, NAV_P6_return_OS2, NAV_P7_return_OS2])
 fig2 = plt.figure()
-axes2 = fig2.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+axes2 = fig2.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd2
 y = NAV_OS2
 axes2.plot(x, y)
@@ -328,7 +330,7 @@ fig2.savefig('7_Portfolios_OS2.png')
 #NAV_P1_return_OS3,
 NAV_OS3 = np.transpose([NAV_P1_return_OS3, NAV_P2_return_OS3, NAV_P3_return_OS3, NAV_P4_return_OS3, NAV_P5_return_OS3, NAV_P6_return_OS3, NAV_P7_return_OS3])
 fig3 = plt.figure()
-axes3 = fig3.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+axes3 = fig3.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd3
 y = NAV_OS3
 axes3.plot(x, y)
@@ -344,7 +346,7 @@ fig3.savefig('7_Portfolios_OS3.png')
 #NAV_PB_3_1_return,     in legend   "Prtf B3: TE<1% without short-sale const",
 NAV_PartB_MC = np.transpose([NAV_P6_return, NAV_PB_3_1_return, NAV_PB_4_1_return])
 figvw1 = plt.figure()
-axesvw1 = figvw1.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+axesvw1 = figvw1.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_btst
 y = NAV_PartB_MC
 axesvw1.plot(x, y)
@@ -359,7 +361,7 @@ figvw1.savefig('VW_MV_OS1.png')
 # NAV_PB_3_1_return_OS2, "Prtf B3: TE<1% without short-sale const",
 NAV_PartB_MC_OS2 = np.transpose([NAV_P6_return_OS2, NAV_PB_3_1_return_OS2, NAV_PB_4_1_return_OS2])
 figvw2 = plt.figure()
-axesvw2 = figvw2.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+axesvw2 = figvw2.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd2
 y = NAV_PartB_MC_OS2
 axesvw2.plot(x, y)
@@ -375,7 +377,7 @@ figvw2.savefig('VW_MV_OS2.png')
 # NAV_PB_3_1_return_OS3,   "Prtf B3: TE<1% without short-sale const",
 NAV_PartB_MC_OS3 = np.transpose([NAV_P6_return_OS3, NAV_PB_3_1_return_OS3, NAV_PB_4_1_return_OS3])
 figvw3 = plt.figure()
-axesvw3 = figvw3.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+axesvw3 = figvw3.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd3
 y = NAV_PartB_MC_OS3
 axesvw3.plot(x, y)
@@ -391,7 +393,7 @@ figvw3.savefig('VW_MV_OS3.png')
 #NAV_PB_3_2_return,     in legend   "Prtf B3: TE<1% without short-sale const",
 NAV_PartB_EQW = np.transpose([NAV_P5_return, NAV_PB_3_2_return, NAV_PB_4_2_return])
 figeqw1 = plt.figure()
-axeseqw1 = figeqw1.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+axeseqw1 = figeqw1.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_btst
 y = NAV_PartB_EQW
 axeseqw1.plot(x, y)
@@ -407,7 +409,7 @@ figeqw1.savefig('EQW_OS1.png')
 # NAV_PB_3_2_return_OS2, "Prtf B3: TE<1% without short-sale const",
 NAV_PartB_EQW_OS2 = np.transpose([NAV_P5_return_OS2, NAV_PB_3_2_return_OS2, NAV_PB_4_2_return_OS2])
 figeqw2 = plt.figure()
-axeseqw2 = figeqw2.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+axeseqw2 = figeqw2.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd2
 y = NAV_PartB_EQW_OS2
 axeseqw2.plot(x, y)
@@ -422,7 +424,7 @@ figeqw2.savefig('EQW_OS2.png')
 # NAV_PB_3_2_return_OS3,   "Prtf B3: TE<1% without short-sale const",
 NAV_PartB_EQW_OS3 = np.transpose([NAV_P5_return_OS3, NAV_PB_3_2_return_OS3, NAV_PB_4_2_return_OS3])
 figeqw3 = plt.figure()
-axeseqw3 = figeqw3.add_axes([0.1, 0.1, 2, 1])  # left, bottom, width, height (range 0 to 1)
+axeseqw3 = figeqw3.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_prd3
 y = NAV_PartB_EQW_OS3
 axeseqw3.plot(x, y)
@@ -497,16 +499,55 @@ print(Theta_eqw)
 P8_EQW_weights = tmp1
 P8_EQW_return  = tmp2
 
-# ## Aggregate Portfolio Returns in lists in order to evaluate Performance.
-#
-# # Market Cap weighted portfolios
-# zippedList_mc =  list(zip(P6_return, PB_3_1_return, PB_4_1_return, P8_MC_return))
-# MC_ports = pd.DataFrame(zippedList_mc, columns=['Mkt Cap', 'TE w ss', 'TE w/o ss', 'B8 MC'], index=)
-#
-# # Equally weighted portfolios
-# zippedList_eqw = list(zip(P5_return, PB_3_2_return, PB_4_2_return, P8_EQW_return))
-# EQW_ports = pd.DataFrame(zippedList_mc, columns=['EQW', 'TE w ss', 'TE w/o ss', 'B8 EQW'], index=)
+## Aggregate Portfolio Returns in lists in order to evaluate Performance
+date_vec_B8       = date_vec[1:].strftime("%Y-%m-%d")
 
+# Market Cap weighted portfolios
+#P6_return       = pd.DataFrame(P6_return, index=date_vec_btst, columns=['Mkt Cap'])
+#PB_3_1_return   = pd.DataFrame(PB_3_1_return, columns=['TE w ss'])
+#PB_4_1_return   = pd.DataFrame(PB_4_1_return, columns=['Mkt Cap'])
 
+# P5_return       = pd.DataFrame(P5_return, columns=['EQW'])
+# PB_3_2_return   = pd.DataFrame(PB_3_2_return, columns=['TE w ss'])
+# PB_4_2_return   = pd.DataFrame(PB_4_2_return, columns=['Mkt Cap'])
+
+P8_MC_return    = pd.DataFrame(P8_MC_return, columns=['B8 param wi'], index=date_vec_B8)
+P8_MC_return    = P8_MC_return * 100
+P8_MC_return = P8_MC_return.loc["1963-07-01":]
+zippedList_mc = list(zip(P6_return, PB_3_1_return, PB_4_1_return))
+MC_ports = pd.DataFrame(zippedList_mc, columns=['Mkt Cap', 'TE w/o ssc', 'TE w ssc'], index=date_vec_btst)
+MC_ports = MC_ports.loc["1963-07-01":, :]
+MC_ports = pd.concat([MC_ports, P8_MC_return], axis=1)
+
+NAV_P8_1_return = np.cumprod(1 + np.array(MC_ports) / 100)
+fig = plt.figure()
+axes = fig.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+axes.plot(NAV_P8_1_return)
+axes.legend(["Prtf 6: MC", "Tracking without short-sale const", "Tracking with short-sale const", "Part_B 8"])
+axes.set_xlabel('Dates')
+axes.set_ylabel('Prtf Value')
+axes.set_title('Portfolio values for the period July 1963 to December 2019')
+fig.show()
+fig.savefig('B8_1.png')
+
+# Equally weighted portfolios
+P8_EQW_return    = pd.DataFrame(P8_EQW_return, columns=['B8 param wi'], index=date_vec_B8)
+P8_EQW_return    = P8_EQW_return * 100
+P8_EQW_return = P8_EQW_return.loc["1963-07-01":]
+zippedList_eqw = list(zip(P5_return, PB_3_2_return, PB_4_2_return))
+EQW_ports = pd.DataFrame(zippedList_eqw, columns=['EQW', 'TE w/o ssc', 'TE w ssc'], index=date_vec_btst)
+EQW_ports = EQW_ports.loc["1963-07-01":, :]
+EQW_ports = pd.concat([EQW_ports, P8_EQW_return], axis=1)
+
+NAV_P8_2_return = np.cumprod(1 + np.array(EQW_ports) / 100)
+fig = plt.figure()
+axes = fig.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+axes.plot(NAV_P8_2_return)
+axes.legend(["Prtf 5: EQW", "Tracking without short-sale const", "Tracking with short-sale const", "Part_B 8"])
+axes.set_xlabel('Dates')
+axes.set_ylabel('Prtf Value')
+axes.set_title('Portfolio values for the period July 1963 to December 2019')
+fig.show()
+fig.savefig('B8_2.png')
 
 print(True)
