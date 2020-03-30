@@ -457,7 +457,8 @@ Value_BM.index  = Size_MC.index
 Momentum        = all_monthly_returns.rolling(12, min_periods=1).mean()
 
 #-------------------------------------------------------------------------------------------
-# Recalculating the benchmark porfolio weights by Market Cap
+# Recalculating the benchmark porfolios weights
+Bench_EQW_weights = np.full((60,10),0.1)
 Total_Mrkt_Caps     = []    # Total_Mrkt_Caps   T x 1
 Bench_MC_weights    = []    # Total_Mrkt_Caps   T x 10
 
@@ -466,42 +467,62 @@ for dates in Size_MC.index:
     den = pd.DataFrame(Total_Mrkt_Caps).iloc[-1][0]
     Bench_MC_weights.append(Size_MC.loc[dates, :].div(den))
 
-# Transforming data to numpy array as quicker to compute than dataframes
-Bench_MC_weights = np.asarray(Bench_MC_weights)
-Size_MC = Size_MC.to_numpy()
-Value_BM = Value_BM.to_numpy()
-Momentum = Momentum.to_numpy()
-all_monthly_returns = all_monthly_returns.to_numpy()
+OS_period = Value_BM.index.loc["1963-07-01":, :]
+Theta_mc = np.empty()
+Theta_eqw = np.empty()
+P8_MC_weights = np.empty()
+P8_MC_return = np.empty()
+P8_EQW_weights = np.empty()
+P8_EQW_return = np.empty()
 
-all_monthly_returns = all_monthly_returns[1:,:]            # removing first month of returns (since we sum starting at t=1)
-Bench_MC_weights = Bench_MC_weights[:-1,:]                 # removing last month of weights (since summed to T-1)
-Size_MC = Size_MC[:-1, :]
-Value_BM = Value_BM[:-1, :]
-Momentum = Momentum[:-1, :]
+for dates in OS_period:
+    idx_date = list(Value_BM.index.strftime("%Y-%m-%d")).index(dates)
+    Bench_MC_weights_IS = Bench_MC_weights.iloc[idx_date-rolling_window:idx_date-1]
+    Size_MC_IS =  Size_MC.iloc[idx_date-rolling_window:idx_date-1]
+    Value_BM_IS =  Value_BM.iloc[idx_date-rolling_window:idx_date-1]
+    Momentum_IS =  Momentum.iloc[idx_date-rolling_window:idx_date-1]
+    all_monthly_returns_IS =  all_monthly_returns.iloc[idx_date-rolling_window:idx_date]
 
-# Getting weights and returns of MC Portf
-fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns, risk_aversion),
-               method="SLSQP")
+    # Transforming data to numpy array as quicker to compute than dataframes
+    Bench_MC_weights_IS = np.asarray(Bench_MC_weights_IS)
+    Size_MC_IS = Size_MC_IS.to_numpy()
+    Value_BM_IS = Value_BM_IS.to_numpy()
+    Momentum_IS = Momentum_IS.to_numpy()
+    all_monthly_returns_IS = all_monthly_returns_IS.to_numpy()
 
-Theta_mc = fun.x
+    all_monthly_returns_IS = all_monthly_returns_IS[1:,:]             # removing first month of returns (since we sum starting at t=1)
+    #Bench_MC_weights = Bench_MC_weights[:-1,:]                 # removing last month of weights (since summed to T-1)
+    #Size_MC = Size_MC[:-1, :]
+    #Value_BM = Value_BM[:-1, :]
+    #Momentum = Momentum[:-1, :]
+
+    # Getting weights and returns of MC Portf
+    fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_MC_weights_IS, Size_MC_IS, Value_BM_IS, Momentum_IS, all_monthly_returns_IS, risk_aversion),
+                   method="SLSQP")
+
+    tt_mc = fun.x
+    np.append(Theta_mc, tt_mc)
+
+
+    (tmp1, tmp2) = myf.prtf8(tt_mc, Bench_MC_weights[idx_date,:], Size_MC[idx_date,:], Value_BM[idx_date,:], Momentum[idx_date,:], all_monthly_returns[idx_date,:])
+    np.append(P8_MC_weights, tmp1)
+    np.append(P8_MC_return, tmp2)
+
+
+    # Getting weights and returns of EQW Portf
+
+    fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_EQW_weights, Size_MC_IS, Value_BM_IS, Momentum_IS, all_monthly_returns_IS, risk_aversion),
+                   method="SLSQP")
+
+    tt_eqw = fun.x
+    np.append(Theta_eqw, tt_eqw)
+
+    (tmp1, tmp2)= myf.prtf8(tt_eqw, Bench_EQW_weights[idx_date,:], Size_MC[idx_date,:], Value_BM[idx_date,:], Momentum[idx_date,:], all_monthly_returns[idx_date,:])
+    np.append(P8_EQW_weights, tmp1)
+    np.append(P8_EQW_return, tmp2)
+
 print(Theta_mc)
-
-(tmp1, tmp2) = myf.prtf8(Theta_mc, Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
-P8_MC_weights = tmp1
-P8_MC_return  = tmp2
-
-
-# Getting weights and returns of EQW Portf
-Bench_EQW_weights = np.full((1122,10),0.1)
-fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_EQW_weights, Size_MC, Value_BM, Momentum, all_monthly_returns, risk_aversion),
-               method="SLSQP")
-
-Theta_eqw = fun.x
 print(Theta_eqw)
-
-(tmp1, tmp2)= myf.prtf8(Theta_eqw, Bench_EQW_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
-P8_EQW_weights = tmp1
-P8_EQW_return  = tmp2
 
 ## Aggregate Portfolio Returns in lists in order to evaluate Performance
 date_vec_B8       = date_vec[1:].strftime("%Y-%m-%d")
@@ -553,7 +574,7 @@ df_Fama_5.index = myf.eomonth(pd.to_datetime(df_Fama_5.index, format= '%Y%m'))
 period1 = [pd.to_datetime(datetime.datetime(1963, 7, 31)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
 period2 = [pd.to_datetime(datetime.datetime(1990, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
 period3 = [pd.to_datetime(datetime.datetime(2000, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
-period = [period1] #, period2, period3]
+period = [period1, period2, period3] #, period2, period3]
 
 
 for subperiod in period:
@@ -615,7 +636,6 @@ axes.set_title('Portfolio values for the period July 1963 to December 2019')
 fig.show()
 fig.savefig('B8_2.png')
 
-print(True)
 
 date_tmp = myf.eomonth(EQW_ports.index)
 EQW_ports.index = date_tmp
@@ -667,3 +687,5 @@ for subperiod in period:
             performance_measure[s].loc[factor_tmp,p] = tmp
     
         print(performance_measure[s])
+
+print(True)
