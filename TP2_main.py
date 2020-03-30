@@ -466,18 +466,19 @@ for dates in Size_MC.index:
     Total_Mrkt_Caps.append(all_avg_firm_size.loc[dates, :] @ all_num_firms.loc[dates, :])
     den = pd.DataFrame(Total_Mrkt_Caps).iloc[-1][0]
     Bench_MC_weights.append(Size_MC.loc[dates, :].div(den))
-
+Bench_MC_weights = pd.DataFrame(Bench_MC_weights)
 
 OS_period = Value_BM.index["1963-07-01" <= Value_BM.index]
-Theta_mc = np.empty()
-Theta_eqw = np.empty()
-P8_MC_weights = np.empty()
-P8_MC_return = np.empty()
-P8_EQW_weights = np.empty()
-P8_EQW_return = np.empty()
+Theta_mc = []
+Theta_eqw = []
+P8_MC_weights = []
+P8_MC_return = []
+P8_EQW_weights = []
+P8_EQW_return = []
 
 for dates in OS_period:
-    idx_date = Value_BM.index.strftime("%Y-%m-%d").index(dates)
+    print(dates)
+    idx_date = Value_BM.index.get_loc(dates)
     Bench_MC_weights_IS = Bench_MC_weights.iloc[idx_date-rolling_window:idx_date-1]
     Size_MC_IS =  Size_MC.iloc[idx_date-rolling_window:idx_date-1]
     Value_BM_IS =  Value_BM.iloc[idx_date-rolling_window:idx_date-1]
@@ -502,12 +503,12 @@ for dates in OS_period:
                    method="SLSQP")
 
     tt_mc = fun.x
-    np.append(Theta_mc, tt_mc)
+    Theta_mc.append(tt_mc)
 
 
-    (tmp1, tmp2) = myf.prtf8(tt_mc, Bench_MC_weights[idx_date,:], Size_MC[idx_date,:], Value_BM[idx_date,:], Momentum[idx_date,:], all_monthly_returns[idx_date,:])
-    np.append(P8_MC_weights, tmp1)
-    np.append(P8_MC_return, tmp2)
+    (tmp1, tmp2) = myf.prtf8(tt_mc, Bench_MC_weights.iloc[idx_date,:], Size_MC.iloc[idx_date,:], Value_BM.iloc[idx_date,:], Momentum.iloc[idx_date,:], all_monthly_returns.iloc[idx_date,:])
+    P8_MC_weights.append(tmp1)
+    P8_MC_return.append(tmp2)
 
 
     # Getting weights and returns of EQW Portf
@@ -516,11 +517,11 @@ for dates in OS_period:
                    method="SLSQP")
 
     tt_eqw = fun.x
-    np.append(Theta_eqw, tt_eqw)
+    Theta_eqw.append(tt_eqw)
 
     (tmp1, tmp2)= myf.prtf8(tt_eqw, Bench_EQW_weights[idx_date,:], Size_MC[idx_date,:], Value_BM[idx_date,:], Momentum[idx_date,:], all_monthly_returns[idx_date,:])
-    np.append(P8_EQW_weights, tmp1)
-    np.append(P8_EQW_return, tmp2)
+    P8_EQW_weights.append(tmp1)
+    P8_EQW_return.append(tmp2)
 
 print(Theta_mc)
 print(Theta_eqw)
