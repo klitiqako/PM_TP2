@@ -116,9 +116,9 @@ time_elapsed2 = (time.clock() - time_start)
 ##Analytical takes half as long
 
 ###############Q3
-Idio_vol = np.zeros((len(df_Returns),len(industries)))
+Idio_vol = np.zeros((len(df_Returns)-11,len(industries)))
 Idio_vol= pd.DataFrame(Idio_vol)
-Idio_vol.index = df_Returns.index
+Idio_vol.index = df_Returns.index[11:]
 Idio_vol.columns = industries
 
 
@@ -134,7 +134,7 @@ for i in range(0,len(Idio_vol)):
         Idio_vol.iloc[i,j] = std_resid
 
 ###############Q4
-Volatility_Q4 = Idio_vol[11:]
+Volatility_Q4 = Idio_vol
 Book_to_Mkt_Q4 = Book_to_Mkt_C[11:]
 Market_cap_Q4 = Market_cap_C[11:]
 
@@ -288,20 +288,20 @@ for i in range(0,len(betas)):
     max5 = min(large5)
     min5 = max(small5)
     for j in range(0,5):
-        Weight_VW_Vol.loc[betas.index[i],large1.index[j]] = round(Market_cap_Q4.loc[betas.index[i],(large1.index[j])]/Market_Cap_L1,3)
-        Weight_VW_Vol.loc[betas.index[i],small1.index[j]] = -round(Market_cap_Q4.loc[betas.index[i],(small1.index[j])]/Market_Cap_S1,3)
+        Weight_VW_Vol.loc[betas.index[i],large1.index[j]] = Market_cap_Q4.loc[betas.index[i],(large1.index[j])]/Market_Cap_L1
+        Weight_VW_Vol.loc[betas.index[i],small1.index[j]] = -Market_cap_Q4.loc[betas.index[i],(small1.index[j])]/Market_Cap_S1
         
-        Weight_VW_Book_Mkt.loc[betas.index[i],large2.index[j]] = round(Market_cap_Q4.loc[betas.index[i],(large2.index[j])]/Market_Cap_L2,3)
-        Weight_VW_Book_Mkt.loc[betas.index[i],small2.index[j]] = -round(Market_cap_Q4.loc[betas.index[i],(small2.index[j])]/Market_Cap_S2,3)
+        Weight_VW_Book_Mkt.loc[betas.index[i],large2.index[j]] = Market_cap_Q4.loc[betas.index[i],(large2.index[j])]/Market_Cap_L2
+        Weight_VW_Book_Mkt.loc[betas.index[i],small2.index[j]] = -Market_cap_Q4.loc[betas.index[i],(small2.index[j])]/Market_Cap_S2
         
-        Weight_VW_Mkt_cap.loc[betas.index[i],large3.index[j]] = round(Market_cap_Q4.loc[betas.index[i],(large3.index[j])]/Market_Cap_L3,3)
-        Weight_VW_Mkt_cap.loc[betas.index[i],small3.index[j]] = -round(Market_cap_Q4.loc[betas.index[i],(small3.index[j])]/Market_Cap_S3,3)
+        Weight_VW_Mkt_cap.loc[betas.index[i],large3.index[j]] = Market_cap_Q4.loc[betas.index[i],(large3.index[j])]/Market_Cap_L3
+        Weight_VW_Mkt_cap.loc[betas.index[i],small3.index[j]] = -Market_cap_Q4.loc[betas.index[i],(small3.index[j])]/Market_Cap_S3
         
-        Weight_VW_Momemtum.loc[betas.index[i],large4.index[j]] = round(Market_cap_Q4.loc[betas.index[i],(large4.index[j])]/Market_Cap_L4,3)
-        Weight_VW_Momemtum.loc[betas.index[i],small4.index[j]] = -round(Market_cap_Q4.loc[betas.index[i],(small4.index[j])]/Market_Cap_S4,3)
+        Weight_VW_Momemtum.loc[betas.index[i],large4.index[j]] = Market_cap_Q4.loc[betas.index[i],(large4.index[j])]/Market_Cap_L4
+        Weight_VW_Momemtum.loc[betas.index[i],small4.index[j]] = -Market_cap_Q4.loc[betas.index[i],(small4.index[j])]/Market_Cap_S4
         
-        Weight_VW_Betas.loc[betas.index[i],large5.index[j]] = round(Market_cap_Q4.loc[betas.index[i],(large5.index[j])]/Market_Cap_L5,3)
-        Weight_VW_Betas.loc[betas.index[i],small5.index[j]] = -round(Market_cap_Q4.loc[betas.index[i],(small5.index[j])]/Market_Cap_S5,3)
+        Weight_VW_Betas.loc[betas.index[i],large5.index[j]] = Market_cap_Q4.loc[betas.index[i],(large5.index[j])]/Market_Cap_L5
+        Weight_VW_Betas.loc[betas.index[i],small5.index[j]] = -Market_cap_Q4.loc[betas.index[i],(small5.index[j])]/Market_Cap_S5
    
     Weight_VW_Vol.iloc[i,:][Weight_VW_Vol.iloc[i,:]==1] = 0
     Weight_VW_Book_Mkt.iloc[i,:][Weight_VW_Book_Mkt.iloc[i,:]==1] = 0
@@ -340,7 +340,7 @@ for k in range(0,5):
 
 VW_Strategy_Returns = np.cumprod(1 + Return_VW / 100).iloc[-1,:]
         
-Market_Return = np.cumprod(1+(df_Fama['Mkt-RF'][df_Fama.index >= '1927-06-01'] + df_Fama['RF'][df_Fama.index >= '1927-06-01'])/100)[-1]
+Market_Return = np.cumprod(1+(df_Fama['Mkt-RF'][df_Fama.index >= '1950-06-01'] + df_Fama['RF'][df_Fama.index >= '1950-06-01'])/100)[-1]
 
 #We can see that the Market_Return is much higher than our current strategies let's try to fix that
 
@@ -554,7 +554,7 @@ plt.plot(np.cumprod(1 + Return_EW_Strat2 / 100))
 #Regression on FAMA factors
 #3-FACTORS
 
-Periods = ['1949-12-01','1989-12-01','1999-12-01']
+Periods = ['1963-06-01','1989-12-01','1999-12-01']
 alpha_3_EW = pd.DataFrame(np.zeros((3,5)))
 alpha_3_EW.columns = EW_Strat2_Returns.index
 alpha_3_VW = pd.DataFrame(np.zeros((3,5)))
@@ -627,7 +627,7 @@ for S in range(0,len(alphas_5_Factors)):
         
 #Sharpe
 
-Periods = ['1949-12-01','1989-12-01','1999-12-01']
+Periods = ['1963-06-01','1989-12-01','1999-12-01']
 Sharpe_EW = pd.DataFrame(np.zeros((3,5)))
 Sharpe_EW.columns = EW_Strat2_Returns.index
 Sharpe_VW = pd.DataFrame(np.zeros((3,5)))
