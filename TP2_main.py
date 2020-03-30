@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import itertools as it
 from scipy.optimize import minimize
 import random
+import datetime
+import statsmodels.api as sm
 
 # Import function
 from function import myf
@@ -41,7 +43,7 @@ end_date            = "2020-01-01"
 idx_start_1         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_1)
 idx_start_2         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_2)
 idx_start_3         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_3)
-idx_end             = list(date_vec.strftime("%Y-%m-%d")).index(end_date)
+idx_end             = list(date_vec.strftime("%Y-%m-%d")).index(end_date) + 1
 date_vec_btst       = date_vec[idx_start_1:idx_end].strftime("%Y-%m-%d")
 date_vec_prd2       = date_vec[idx_start_2:idx_end].strftime("%Y-%m-%d")
 date_vec_prd3       = date_vec[idx_start_3:idx_end].strftime("%Y-%m-%d")
@@ -295,16 +297,17 @@ NAV_PB_4_2_return_OS3   = np.cumprod(1 + np.array(PB_4_2_return[idx_start_3-idx_
 
 ################### Graphs of Accrued returns accross the different periods
 
+date_vec_btst = pd.to_datetime(date_vec_btst)
+date_vec_prd2 = pd.to_datetime(date_vec_prd2)
+date_vec_prd3 = pd.to_datetime(date_vec_prd3)
 
 #   NAV_P1_return,     Keeping this series in cmt as doesn't fit properly
 NAV = np.transpose([NAV_P1_return, NAV_P2_return, NAV_P3_return, NAV_P4_return, NAV_P5_return, NAV_P6_return, NAV_P7_return])
 fig1 = plt.figure()
 axes1 = fig1.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
-NAV = pd.DataFrame(NAV, index=date_vec_btst)
-#x = date_vec_btst
-#y = NAV
-#axes1.plot(x, y)
-axes1.plot(NAV)
+x = date_vec_btst
+y = NAV
+axes1.plot(x, y)
 axes1.legend(["Prtf 1", "Prtf 2", "Prtf 3", "Prtf 4", "Prtf 5", "Prtf 6", "Prtf 7"])
 axes1.set_xlabel('Dates')
 axes1.set_ylabel('Prtf Value')
@@ -400,6 +403,7 @@ axeseqw1.plot(x, y)
 axeseqw1.legend(["Prtf 5: EQW weighted", "Prtf B3: TE<1% without short-sale const","Prtf B4: TE<1% with short-sale const"])
 axeseqw1.set_xlabel('Dates')
 axeseqw1.set_ylabel('Prtf Value')
+plt.yscale('log')
 axeseqw1.set_title('Portfolio values for the period July 1931 to December 2019')
 figeqw1.show()
 figeqw1.savefig('EQW_OS1.png')
@@ -530,6 +534,67 @@ axes.set_title('Portfolio values for the period July 1963 to December 2019')
 fig.show()
 fig.savefig('B8_1.png')
 
+MC_ports.index = myf.eomonth(MC_ports.index)
+
+## Performance
+
+# Input: DataFrame of returns according to each strategies
+input_file_path = './data/FAMA_3_Factors.CSV'
+df_Fama_3 = pd.read_csv(input_file_path,
+                   index_col = 0)
+input_file_path = './data/FAMA_5_Factors.CSV'
+df_Fama_5 = pd.read_csv(input_file_path,
+                   index_col = 0)
+df_Fama_3.index = myf.eomonth(pd.to_datetime(df_Fama_3.index, format= '%Y%m'))
+df_Fama_5.index = myf.eomonth(pd.to_datetime(df_Fama_5.index, format= '%Y%m'))
+
+
+
+period1 = [pd.to_datetime(datetime.datetime(1963, 7, 31)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
+period2 = [pd.to_datetime(datetime.datetime(1990, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
+period3 = [pd.to_datetime(datetime.datetime(2000, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
+period = [period1] #, period2, period3]
+
+
+for subperiod in period:
+    start_date = subperiod[0]
+    end_date = subperiod[1]
+    date_vec_tmp = MC_ports.index[(MC_ports.index >= start_date)&(MC_ports.index <= end_date)]
+    returns_tmp = MC_ports.loc[date_vec_tmp, :]
+    strat = MC_ports.columns
+    performance_measure_type = ['Sharpe_Ratio', 'Fama_3', 'Fama_4', 'Fama_5']
+    nb_factor = [1, 4, 5, 6]
+    factor = ['alpha', 'Mkt-RF', 'SMB', 'HML', 'RMW', 'CMA']
+    performance_measure = {}
+    for s in strat:
+        performance_measure[s] = pd.DataFrame(np.zeros((len(factor), len(performance_measure_type))))
+        performance_measure[s].columns = performance_measure_type
+        performance_measure[s].index = factor
+    
+    for s in strat:
+        print(s, subperiod)
+        for i, p in enumerate(performance_measure_type):
+            factor_tmp = factor[:nb_factor[i]]
+            if p == 'Sharpe_Ratio':
+                # Sharpe Ratio: Excess Return / Standard deviation
+                tmp = returns_tmp.loc[:,s].subtract(df_Fama_3.loc[date_vec_tmp, 'RF']).mean() / returns_tmp.loc[:,s].std()
+                
+            else: #Fama French
+                #Excess Return
+                Y = np.array(returns_tmp.loc[:,s].subtract(df_Fama_3.loc[date_vec_tmp, 'RF']))
+                if p == 'Fama_3':
+                    X = df_Fama_3.loc[date_vec_tmp, factor_tmp[1:]]
+                else: # Fama_4 and Fama_5
+                    X = df_Fama_5.loc[date_vec_tmp, factor_tmp[1:]]
+               
+                X = sm.add_constant(X)
+                tmp = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
+    
+            performance_measure[s].loc[factor_tmp,p] = tmp
+    
+        print(performance_measure[s])
+
+
 # Equally weighted portfolios
 P8_EQW_return    = pd.DataFrame(P8_EQW_return, columns=['B8 param wi'], index=date_vec_B8)
 P8_EQW_return    = P8_EQW_return * 100
@@ -551,3 +616,54 @@ fig.show()
 fig.savefig('B8_2.png')
 
 print(True)
+
+date_tmp = myf.eomonth(EQW_ports.index)
+EQW_ports.index = date_tmp
+
+
+## Performance calculation
+
+
+period1 = [pd.to_datetime(datetime.datetime(1963, 7, 31)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
+period2 = [pd.to_datetime(datetime.datetime(1990, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
+period3 = [pd.to_datetime(datetime.datetime(2000, 1, 1)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
+period = [period1, period2, period3]
+
+
+for subperiod in period:
+    start_date = subperiod[0]
+    end_date = subperiod[1]
+    date_vec_tmp = EQW_ports.index[(EQW_ports.index >= start_date)&(EQW_ports.index <= end_date)]
+    returns_tmp = EQW_ports.loc[date_vec_tmp, :]
+    strat = EQW_ports.columns
+    performance_measure_type = ['Sharpe_Ratio', 'Fama_3', 'Fama_4', 'Fama_5']
+    nb_factor = [1, 4, 5, 6]
+    factor = ['alpha', 'Mkt-RF', 'SMB', 'HML', 'RMW', 'CMA']
+    performance_measure = {}
+    for s in strat:
+        performance_measure[s] = pd.DataFrame(np.zeros((len(factor), len(performance_measure_type))))
+        performance_measure[s].columns = performance_measure_type
+        performance_measure[s].index = factor
+    
+    for s in strat:
+        print(s, subperiod)
+        for i, p in enumerate(performance_measure_type):
+            factor_tmp = factor[:nb_factor[i]]
+            if p == 'Sharpe_Ratio':
+                # Sharpe Ratio: Excess Return / Standard deviation
+                tmp = returns_tmp.loc[:,s].subtract(df_Fama_3.loc[date_vec_tmp, 'RF']).mean() / returns_tmp.loc[:,s].std()
+                
+            else: #Fama French
+                #Excess Return
+                Y = np.array(returns_tmp.loc[:,s].subtract(df_Fama_3.loc[date_vec_tmp, 'RF']))
+                if p == 'Fama_3':
+                    X = df_Fama_3.loc[date_vec_tmp, factor_tmp[1:]]
+                else: # Fama_4 and Fama_5
+                    X = df_Fama_5.loc[date_vec_tmp, factor_tmp[1:]]
+               
+                X = sm.add_constant(X)
+                tmp = np.linalg.solve(np.dot(np.array(X).T, np.array(X)), np.dot(np.array(X).T, np.array(Y)))
+    
+            performance_measure[s].loc[factor_tmp,p] = tmp
+    
+        print(performance_measure[s])
