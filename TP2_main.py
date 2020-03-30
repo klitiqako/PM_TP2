@@ -461,27 +461,52 @@ for dates in Size_MC.index:
     Bench_MC_weights.append(Size_MC.loc[dates, :].div(den))
 
 # Transforming data to numpy array as quicker to compute than dataframes
-# Bench_MC_weights = np.asarray(Bench_MC_weights)
-# Size_MC = Size_MC.to_numpy()
-# Value_BM = Value_BM.to_numpy()
-# Momentum = Momentum.to_numpy()
-# all_monthly_returns = all_monthly_returns.to_numpy()
-#
-# all_monthly_returns = all_monthly_returns[1:,:]            # removing first month of returns (since we sum starting at t=1)
-# Bench_MC_weights = Bench_MC_weights[:-1,:]                 # removing last month of weights (since summed to T-1)
-# Size_MC = Size_MC[:-1, :]
-# Value_BM = Value_BM[:-1, :]
-# Momentum = Momentum[:-1, :]
+Bench_MC_weights = np.asarray(Bench_MC_weights)
+Size_MC = Size_MC.to_numpy()
+Value_BM = Value_BM.to_numpy()
+Momentum = Momentum.to_numpy()
+all_monthly_returns = all_monthly_returns.to_numpy()
 
+all_monthly_returns = all_monthly_returns[1:,:]            # removing first month of returns (since we sum starting at t=1)
+Bench_MC_weights = Bench_MC_weights[:-1,:]                 # removing last month of weights (since summed to T-1)
+Size_MC = Size_MC[:-1, :]
+Value_BM = Value_BM[:-1, :]
+Momentum = Momentum[:-1, :]
 
-
-#fun = myf.objective_8([0.4, 0.4, 0.2], Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
+# Getting weights and returns of MC Portf
 fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns, risk_aversion),
                method="SLSQP")
 
-Theta = fun.x
-print(Theta)
+Theta_mc = fun.x
+print(Theta_mc)
 
-P8_weights = myf.prtf8(Theta, Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
+(tmp1, tmp2) = myf.prtf8(Theta_mc, Bench_MC_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
+P8_MC_weights = tmp1
+P8_MC_return  = tmp2
+
+
+# Getting weights and returns of EQW Portf
+Bench_EQW_weights = np.full((1122,10),0.1)
+fun = minimize(myf.objective_8, [0.4, 0.4, 0.2], args=(Bench_EQW_weights, Size_MC, Value_BM, Momentum, all_monthly_returns, risk_aversion),
+               method="SLSQP")
+
+Theta_eqw = fun.x
+print(Theta_eqw)
+
+(tmp1, tmp2)= myf.prtf8(Theta_eqw, Bench_EQW_weights, Size_MC, Value_BM, Momentum, all_monthly_returns)
+P8_EQW_weights = tmp1
+P8_EQW_return  = tmp2
+
+# ## Aggregate Portfolio Returns in lists in order to evaluate Performance.
+#
+# # Market Cap weighted portfolios
+# zippedList_mc =  list(zip(P6_return, PB_3_1_return, PB_4_1_return, P8_MC_return))
+# MC_ports = pd.DataFrame(zippedList_mc, columns=['Mkt Cap', 'TE w ss', 'TE w/o ss', 'B8 MC'], index=)
+#
+# # Equally weighted portfolios
+# zippedList_eqw = list(zip(P5_return, PB_3_2_return, PB_4_2_return, P8_EQW_return))
+# EQW_ports = pd.DataFrame(zippedList_mc, columns=['EQW', 'TE w ss', 'TE w/o ss', 'B8 EQW'], index=)
+
+
 
 print(True)

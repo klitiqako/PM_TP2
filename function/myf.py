@@ -253,18 +253,18 @@ def prtf_return(weights, industry_returns):
 # add constraint on weights -- done
 
 def objective_8(theta, w_bar, x1, x2, x3, monthly_ret, gamma):
-    # Transforming data to numpy array as quicker to compute than dataframes
-    w_bar = np.asarray(w_bar)
-    x1 = x1.to_numpy()
-    x2 = x2.to_numpy()
-    x3 = x3.to_numpy()
-    monthly_ret = monthly_ret.to_numpy()
-
-    monthly_ret = monthly_ret[1:,:]            # removing first month of returns (since we sum starting at t=1)
-    w_bar = w_bar[:-1,:]                       # removing last month of weights (since summed to T-1)
-    x1 = x1[:-1, :]
-    x2 = x2[:-1, :]
-    x3 = x3[:-1, :]
+    # # Transforming data to numpy array as quicker to compute than dataframes
+    # w_bar = np.asarray(w_bar)
+    # x1 = x1.to_numpy()
+    # x2 = x2.to_numpy()
+    # x3 = x3.to_numpy()
+    # monthly_ret = monthly_ret.to_numpy()
+    #
+    # monthly_ret = monthly_ret[1:,:]            # removing first month of returns (since we sum starting at t=1)
+    # w_bar = w_bar[:-1,:]                       # removing last month of weights (since summed to T-1)
+    # x1 = x1[:-1, :]
+    # x2 = x2[:-1, :]
+    # x3 = x3[:-1, :]
 
     # Standardizing characteristics crosssectionally (accross columns)
     x1 = stats.zscore(x1, axis=1)
@@ -297,17 +297,17 @@ def objective_8(theta, w_bar, x1, x2, x3, monthly_ret, gamma):
 
 def prtf8(theta, w_bar, x1, x2, x3, monthly_ret):
     # Transforming data to numpy array as quicker to compute than dataframes
-    w_bar = np.asarray(w_bar)
-    x1 = x1.to_numpy()
-    x2 = x2.to_numpy()
-    x3 = x3.to_numpy()
-    monthly_ret = monthly_ret.to_numpy()
-
-    monthly_ret = monthly_ret[1:, :]  # removing first month of returns (since we sum starting at t=1)
-    w_bar = w_bar[:-1, :]  # removing last month of weights (since summed to T-1)
-    x1 = x1[:-1, :]
-    x2 = x2[:-1, :]
-    x3 = x3[:-1, :]
+    # w_bar = np.asarray(w_bar)
+    # x1 = x1.to_numpy()
+    # x2 = x2.to_numpy()
+    # x3 = x3.to_numpy()
+    # monthly_ret = monthly_ret.to_numpy()
+    #
+    # monthly_ret = monthly_ret[1:, :]  # removing first month of returns (since we sum starting at t=1)
+    # w_bar = w_bar[:-1, :]  # removing last month of weights (since summed to T-1)
+    # x1 = x1[:-1, :]
+    # x2 = x2[:-1, :]
+    # x3 = x3[:-1, :]
 
     # Standardizing characteristics crosssectionally (accross columns)
     x1 = stats.zscore(x1, axis=1)
@@ -323,4 +323,8 @@ def prtf8(theta, w_bar, x1, x2, x3, monthly_ret):
 
     opt_weight = w_bar + theta_x
 
-    return opt_weight
+    ret_i_t = opt_weight * (monthly_ret / 100)
+
+    ret_t = np.sum(ret_i_t, axis=1)  # summing over the col
+
+    return opt_weight, ret_t
