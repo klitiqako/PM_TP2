@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Mar  8 15:40:32 2020
-
-@author: 11134423
-"""
 import pandas as pd
 
 def read_1_data(filename):
