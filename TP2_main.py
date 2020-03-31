@@ -299,7 +299,7 @@ date_vec_prd3 = pd.to_datetime(date_vec_prd3)
 #   NAV_P1_return,     Keeping this series in cmt as doesn't fit properly
 NAV = np.transpose([NAV_P1_return, NAV_P2_return, NAV_P3_return, NAV_P4_return, NAV_P5_return, NAV_P6_return, NAV_P7_return])
 fig1 = plt.figure()
-axes1 = fig1.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+axes1 = fig1.add_axes([0.01, 0.01, 0.9, 0.9])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_btst
 y = NAV
 axes1.plot(x, y)
@@ -560,7 +560,7 @@ axes.set_xlabel('Dates')
 axes.set_ylabel('Prtf Value')
 axes.set_title('Portfolio values for the period January 1990 to December 2019')
 fig2.show()
-fig3.savefig('B8_MC_2.png')
+fig2.savefig('B8_MC_2.png')
 
 MC_ports_3 = MC_ports.loc["2000-01-01":, :]
 OS_period_3 = Value_BM.index["2000-01-01" <= Value_BM.index]
@@ -647,21 +647,23 @@ EQW_ports = EQW_ports.loc["1963-07-01":, :]
 EQW_ports = pd.concat([EQW_ports, P8_EQW_return], axis=1)
 
 NAV_P8_2_return = np.cumprod(1 + np.array(EQW_ports) / 100, axis=0)
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
-axes.plot(NAV_P8_2_return)
+fig4 = plt.figure()
+axes = fig4.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+x = OS_period
+y = NAV_P8_2_return
+axes.plot(x,y)
 axes.legend(["Bench: EQW", "Tracking without short-sale const", "Tracking with short-sale const", "EQW Tilted"])
 axes.set_xlabel('Dates')
 axes.set_ylabel('Prtf Value')
 axes.set_title('Portfolio values for the period July 1963 to December 2019')
-fig.show()
-fig.savefig('B8_EQW_1.png')
+fig4.show()
+fig4.savefig('B8_EQW_1.png')
 
 EQW_ports_2 = EQW_ports.loc["1990-01-01":, :]
 EQW_period_2 = Value_BM.index["1990-01-01" <= Value_BM.index]
 NAV_P8_2_return_2 = np.cumprod(1 + np.array(EQW_ports_2) / 100, axis=0)
-fig2 = plt.figure()
-axes = fig2.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+fig5 = plt.figure()
+axes = fig5.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = EQW_period_2
 y = NAV_P8_2_return_2
 axes.plot(x,y)
@@ -669,14 +671,14 @@ axes.legend(["Bench: EQW weighted", "Tracking without short-sale const", "Tracki
 axes.set_xlabel('Dates')
 axes.set_ylabel('Prtf Value')
 axes.set_title('Portfolio values for the period January 1990 to December 2019')
-fig2.show()
-fig3.savefig('B8_EQW_2.png')
+fig5.show()
+fig5.savefig('B8_EQW_2.png')
 
 EQW_ports_3 = EQW_ports.loc["2000-01-01":, :]
 EQW_period_3 = Value_BM.index["2000-01-01" <= Value_BM.index]
 NAV_P8_2_return_3 = np.cumprod(1 + np.array(EQW_ports_3) / 100, axis=0)
-fig2 = plt.figure()
-axes = fig2.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+fig6 = plt.figure()
+axes = fig6.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
 x = EQW_period_3
 y = NAV_P8_2_return_3
 axes.plot(x,y)
@@ -684,8 +686,8 @@ axes.legend(["Bench: EQW weighted", "Tracking without short-sale const", "Tracki
 axes.set_xlabel('Dates')
 axes.set_ylabel('Prtf Value')
 axes.set_title('Portfolio values for the period January 2000 to December 2019')
-fig2.show()
-fig3.savefig('B8_EQW_3.png')
+fig6.show()
+fig6.savefig('B8_EQW_3.png')
 
 
 date_tmp = myf.eomonth(EQW_ports.index)
