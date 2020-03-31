@@ -27,17 +27,12 @@ sum_BE_div_sum_ME   = read_data.read_2_data("TP2_sum_BE_div_sum_ME.csv")
 
 # Parameter of the back testing
 TE_threshold        = 1
-rolling_window      = 60  # Number of weeks in period used for estimation 5 years
+rolling_window      = 60  # Number of months in period used for estimation 5 years
 
 start_date_1        = "1931-07-01"
 start_date_2        = "1990-01-01"
 start_date_3        = "2000-01-01"
 end_date            = "2020-01-01"
-
-#To test shorter period
-#start_date_2        = "1933-01-01"
-#start_date_3        = "1934-01-01"
-#end_date            = "1935-01-01"
 
 
 idx_start_1         = list(date_vec.strftime("%Y-%m-%d")).index(start_date_1)
@@ -304,11 +299,11 @@ date_vec_prd3 = pd.to_datetime(date_vec_prd3)
 #   NAV_P1_return,     Keeping this series in cmt as doesn't fit properly
 NAV = np.transpose([NAV_P1_return, NAV_P2_return, NAV_P3_return, NAV_P4_return, NAV_P5_return, NAV_P6_return, NAV_P7_return])
 fig1 = plt.figure()
-axes1 = fig1.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+axes1 = fig1.add_axes([0.01, 0.01, 0.9, 0.9])  # left, bottom, width, height (range 0 to 1)
 x = date_vec_btst
 y = NAV
 axes1.plot(x, y)
-axes1.legend(["Prtf 1", "Prtf 2", "Prtf 3", "Prtf 4", "Prtf 5", "Prtf 6", "Prtf 7"])
+axes1.legend(["max Sharpe without ssc", "max Sharpe with ssc", "1/var", "1/vol", "1/N", "MC weighted", "min var"])
 axes1.set_xlabel('Dates')
 axes1.set_ylabel('Prtf Value')
 axes1.set_title('Portfolio values for the period July 1931 to December 2019')
@@ -323,7 +318,7 @@ axes2 = fig2.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (rang
 x = date_vec_prd2
 y = NAV_OS2
 axes2.plot(x, y)
-axes2.legend(["Prtf 1", "Prtf 2", "Prtf 3", "Prtf 4", "Prtf 5", "Prtf 6", "Prtf 7"])
+axes2.legend(["max Sharpe without ssc", "max Sharpe with ssc", "1/var", "1/vol", "1/N", "MC weighted", "min var"])
 axes2.set_xlabel('Dates')
 axes2.set_ylabel('Prtf Value')
 axes2.set_title('Portfolio values for the period January 1990 to December 2019')
@@ -337,7 +332,7 @@ axes3 = fig3.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (rang
 x = date_vec_prd3
 y = NAV_OS3
 axes3.plot(x, y)
-axes3.legend(["Prtf 1", "Prtf 2", "Prtf 3","Prtf 4","Prtf 5","Prtf 6","Prtf 7"])
+axes3.legend(["max Sharpe without ssc", "max Sharpe with ssc", "1/var", "1/vol", "1/N", "MC weighted", "min var"])
 axes3.set_xlabel('Dates')
 axes3.set_ylabel('Prtf Value')
 axes3.set_title('Portfolio values for the period January 2000 to December 2019')
@@ -353,7 +348,7 @@ axesvw1 = figvw1.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (
 x = date_vec_btst
 y = NAV_PartB_MC
 axesvw1.plot(x, y)
-axesvw1.legend(["Prtf 6: MC weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axesvw1.legend(["Bench: MC weighted", "Tracking without short-sale const", "Tracking with short-sale const"])
 axesvw1.set_xlabel('Dates')
 axesvw1.set_ylabel('Prtf Value')
 axesvw1.set_title('Portfolio values for the period July 1931 to December 2019')
@@ -368,7 +363,7 @@ axesvw2 = figvw2.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (
 x = date_vec_prd2
 y = NAV_PartB_MC_OS2
 axesvw2.plot(x, y)
-axesvw2.legend(["Prtf 6: MC weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axesvw2.legend(["Bench: MC weighted", "Tracking without short-sale const", "Tracking with short-sale const"])
 axesvw2.set_xlabel('Dates')
 axesvw2.set_ylabel('Prtf Value')
 axesvw2.set_title('Portfolio values for the period January 1990 to December 2019')
@@ -384,7 +379,7 @@ axesvw3 = figvw3.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (
 x = date_vec_prd3
 y = NAV_PartB_MC_OS3
 axesvw3.plot(x, y)
-axesvw3.legend(["Prtf 6: MC weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axesvw3.legend(["Bench: MC weighted", "Tracking without short-sale const", "Tracking with short-sale const"])
 axesvw3.set_xlabel('Dates')
 axesvw3.set_ylabel('Prtf Value')
 axesvw3.set_title('Portfolio values for the period January 2000 to December 2019')
@@ -400,7 +395,7 @@ axeseqw1 = figeqw1.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height
 x = date_vec_btst
 y = NAV_PartB_EQW
 axeseqw1.plot(x, y)
-axeseqw1.legend(["Prtf 5: EQW weighted", "Prtf B3: TE<1% without short-sale const","Prtf B4: TE<1% with short-sale const"])
+axeseqw1.legend(["Bench: EQW weighted", "Tracking without short-sale const", "Tracking with short-sale const"])
 axeseqw1.set_xlabel('Dates')
 axeseqw1.set_ylabel('Prtf Value')
 plt.yscale('log')
@@ -417,7 +412,7 @@ axeseqw2 = figeqw2.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height
 x = date_vec_prd2
 y = NAV_PartB_EQW_OS2
 axeseqw2.plot(x, y)
-axeseqw2.legend(["Prtf 5: EQW weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axeseqw2.legend(["Bench: EQW weighted", "Tracking without short-sale const", "Tracking with short-sale const"])
 axeseqw2.set_xlabel('Dates')
 axeseqw2.set_ylabel('Prtf Value')
 axeseqw2.set_title('Portfolio values for the period January 1990 to December 2019')
@@ -432,7 +427,7 @@ axeseqw3 = figeqw3.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height
 x = date_vec_prd3
 y = NAV_PartB_EQW_OS3
 axeseqw3.plot(x, y)
-axeseqw3.legend(["Prtf 5: EQW weighted", "Prtf B3: TE<1% without short-sale const", "Prtf B4: TE<1% with short-sale const"])
+axeseqw3.legend(["Bench: EQW weighted", "Tracking without short-sale const", "Tracking with short-sale const"])
 axeseqw3.set_xlabel('Dates')
 axeseqw3.set_ylabel('Prtf Value')
 axeseqw3.set_title('Portfolio values for the period January 2000 to December 2019')
@@ -452,7 +447,6 @@ Size_MC         = all_avg_firm_size * all_num_firms
 Value_BM        = sum_BE_div_sum_ME.loc[sum_BE_div_sum_ME.index.repeat(12)]
 Value_BM        = Value_BM.iloc[:-5, :]
 Value_BM.index  = Size_MC.index
-
 
 Momentum        = all_monthly_returns.rolling(12, min_periods=1).mean()
 
@@ -479,11 +473,11 @@ P8_EQW_return = []
 for dates in OS_period:
     print(dates)
     idx_date = Value_BM.index.get_loc(dates)
-    Bench_MC_weights_IS = Bench_MC_weights.iloc[idx_date-rolling_window:idx_date-1]
-    Size_MC_IS =  Size_MC.iloc[idx_date-rolling_window:idx_date-1]
-    Value_BM_IS =  Value_BM.iloc[idx_date-rolling_window:idx_date-1]
-    Momentum_IS =  Momentum.iloc[idx_date-rolling_window:idx_date-1]
-    all_monthly_returns_IS =  all_monthly_returns.iloc[idx_date-rolling_window:idx_date]
+    Bench_MC_weights_IS = Bench_MC_weights.iloc[idx_date-rolling_window-1:idx_date-1]
+    Size_MC_IS =  Size_MC.iloc[idx_date-rolling_window-1:idx_date-1]
+    Value_BM_IS =  Value_BM.iloc[idx_date-rolling_window-1:idx_date-1]
+    Momentum_IS =  Momentum.iloc[idx_date-rolling_window-1:idx_date-1]
+    all_monthly_returns_IS =  all_monthly_returns.iloc[idx_date-rolling_window-1:idx_date]
 
     # Transforming data to numpy array as quicker to compute than dataframes
     Bench_MC_weights_IS = np.asarray(Bench_MC_weights_IS)
@@ -493,7 +487,7 @@ for dates in OS_period:
     all_monthly_returns_IS = all_monthly_returns_IS.to_numpy()
 
     all_monthly_returns_IS = all_monthly_returns_IS[1:,:]             # removing first month of returns (since we sum starting at t=1)
-    #Bench_MC_weights = Bench_MC_weights[:-1,:]                 # removing last month of weights (since summed to T-1)
+    #Bench_MC_weights = Bench_MC_weights[:-1,:]                       # removing last month of weights (since summed to T-1)
     #Size_MC = Size_MC[:-1, :]
     #Value_BM = Value_BM[:-1, :]
     #Momentum = Momentum[:-1, :]
@@ -519,43 +513,69 @@ for dates in OS_period:
     tt_eqw = fun.x
     Theta_eqw.append(tt_eqw)
 
-    (tmp1, tmp2)= myf.prtf8(tt_eqw, Bench_EQW_weights[idx_date,:], Size_MC[idx_date,:], Value_BM[idx_date,:], Momentum[idx_date,:], all_monthly_returns[idx_date,:])
+    (tmp1, tmp2)= myf.prtf8(tt_eqw, Bench_EQW_weights[1,:], Size_MC.iloc[idx_date,:], Value_BM.iloc[idx_date,:], Momentum.iloc[idx_date,:], all_monthly_returns.iloc[idx_date,:])
     P8_EQW_weights.append(tmp1)
     P8_EQW_return.append(tmp2)
 
 print(Theta_mc)
 print(Theta_eqw)
 
+#
 ## Aggregate Portfolio Returns in lists in order to evaluate Performance
-date_vec_B8       = date_vec[1:].strftime("%Y-%m-%d")
+#
 
-# Market Cap weighted portfolios
-#P6_return       = pd.DataFrame(P6_return, index=date_vec_btst, columns=['Mkt Cap'])
-#PB_3_1_return   = pd.DataFrame(PB_3_1_return, columns=['TE w ss'])
-#PB_4_1_return   = pd.DataFrame(PB_4_1_return, columns=['Mkt Cap'])
+# Market Cap Weighted portfolios
 
-# P5_return       = pd.DataFrame(P5_return, columns=['EQW'])
-# PB_3_2_return   = pd.DataFrame(PB_3_2_return, columns=['TE w ss'])
-# PB_4_2_return   = pd.DataFrame(PB_4_2_return, columns=['Mkt Cap'])
-
-P8_MC_return    = pd.DataFrame(P8_MC_return, columns=['B8 param wi'], index=date_vec_B8)
-P8_MC_return    = P8_MC_return * 100
+P8_MC_return    = pd.DataFrame(P8_MC_return, columns=['MC Tilt'], index=OS_period)
+#8_MC_return    = P8_MC_return * 100
 P8_MC_return = P8_MC_return.loc["1963-07-01":]
 zippedList_mc = list(zip(P6_return, PB_3_1_return, PB_4_1_return))
 MC_ports = pd.DataFrame(zippedList_mc, columns=['Mkt Cap', 'TE w/o ssc', 'TE w ssc'], index=date_vec_btst)
 MC_ports = MC_ports.loc["1963-07-01":, :]
 MC_ports = pd.concat([MC_ports, P8_MC_return], axis=1)
 
-NAV_P8_1_return = np.cumprod(1 + np.array(MC_ports) / 100)
+NAV_P8_1_return = np.cumprod(1 + np.array(MC_ports) / 100, axis=0)
 fig = plt.figure()
 axes = fig.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
-axes.plot(NAV_P8_1_return)
-axes.legend(["Prtf 6: MC", "Tracking without short-sale const", "Tracking with short-sale const", "Part_B 8"])
+x = OS_period
+y = NAV_P8_1_return
+axes.plot(x,y)
+axes.legend(["Bench: MC weighted", "Tracking without short-sale const", "Tracking with short-sale const", "MC Tilted"])
 axes.set_xlabel('Dates')
 axes.set_ylabel('Prtf Value')
 axes.set_title('Portfolio values for the period July 1963 to December 2019')
 fig.show()
-fig.savefig('B8_1.png')
+fig.savefig('B8_MC_1.png')
+
+MC_ports_2 = MC_ports.loc["1990-01-01":, :]
+OS_period_2 = Value_BM.index["1990-01-01" <= Value_BM.index]
+NAV_P8_1_return_2 = np.cumprod(1 + np.array(MC_ports_2) / 100, axis=0)
+fig2 = plt.figure()
+axes = fig2.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+x = OS_period_2
+y = NAV_P8_1_return_2
+axes.plot(x,y)
+axes.legend(["Bench: MC weighted", "Tracking without short-sale const", "Tracking with short-sale const", "MC Tilted"])
+axes.set_xlabel('Dates')
+axes.set_ylabel('Prtf Value')
+axes.set_title('Portfolio values for the period January 1990 to December 2019')
+fig2.show()
+fig2.savefig('B8_MC_2.png')
+
+MC_ports_3 = MC_ports.loc["2000-01-01":, :]
+OS_period_3 = Value_BM.index["2000-01-01" <= Value_BM.index]
+NAV_P8_1_return_3 = np.cumprod(1 + np.array(MC_ports_3) / 100, axis=0)
+fig3 = plt.figure()
+axes = fig3.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+x = OS_period_3
+y = NAV_P8_1_return_3
+axes.plot(x,y)
+axes.legend(["Bench: MC weighted", "Tracking without short-sale const", "Tracking with short-sale const", "MC Tilted"])
+axes.set_xlabel('Dates')
+axes.set_ylabel('Prtf Value')
+axes.set_title('Portfolio values for the period January 2000 to December 2019')
+fig3.show()
+fig3.savefig('B8_MC_3.png')
 
 MC_ports.index = myf.eomonth(MC_ports.index)
 
@@ -570,7 +590,6 @@ df_Fama_5 = pd.read_csv(input_file_path,
                    index_col = 0)
 df_Fama_3.index = myf.eomonth(pd.to_datetime(df_Fama_3.index, format= '%Y%m'))
 df_Fama_5.index = myf.eomonth(pd.to_datetime(df_Fama_5.index, format= '%Y%m'))
-
 
 
 period1 = [pd.to_datetime(datetime.datetime(1963, 7, 31)) , pd.to_datetime(datetime.datetime(2019, 12, 31))]
@@ -619,24 +638,56 @@ for subperiod in period:
 
 
 # Equally weighted portfolios
-P8_EQW_return    = pd.DataFrame(P8_EQW_return, columns=['B8 param wi'], index=date_vec_B8)
-P8_EQW_return    = P8_EQW_return * 100
+P8_EQW_return    = pd.DataFrame(P8_EQW_return, columns=['EQW Tilt'], index=OS_period)
+#P8_EQW_return    = P8_EQW_return * 100
 P8_EQW_return = P8_EQW_return.loc["1963-07-01":]
 zippedList_eqw = list(zip(P5_return, PB_3_2_return, PB_4_2_return))
 EQW_ports = pd.DataFrame(zippedList_eqw, columns=['EQW', 'TE w/o ssc', 'TE w ssc'], index=date_vec_btst)
 EQW_ports = EQW_ports.loc["1963-07-01":, :]
 EQW_ports = pd.concat([EQW_ports, P8_EQW_return], axis=1)
 
-NAV_P8_2_return = np.cumprod(1 + np.array(EQW_ports) / 100)
-fig = plt.figure()
-axes = fig.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
-axes.plot(NAV_P8_2_return)
-axes.legend(["Prtf 5: EQW", "Tracking without short-sale const", "Tracking with short-sale const", "Part_B 8"])
+NAV_P8_2_return = np.cumprod(1 + np.array(EQW_ports) / 100, axis=0)
+fig4 = plt.figure()
+axes = fig4.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+x = OS_period
+y = NAV_P8_2_return
+axes.plot(x,y)
+axes.legend(["Bench: EQW", "Tracking without short-sale const", "Tracking with short-sale const", "EQW Tilted"])
 axes.set_xlabel('Dates')
 axes.set_ylabel('Prtf Value')
 axes.set_title('Portfolio values for the period July 1963 to December 2019')
-fig.show()
-fig.savefig('B8_2.png')
+fig4.show()
+fig4.savefig('B8_EQW_1.png')
+
+EQW_ports_2 = EQW_ports.loc["1990-01-01":, :]
+EQW_period_2 = Value_BM.index["1990-01-01" <= Value_BM.index]
+NAV_P8_2_return_2 = np.cumprod(1 + np.array(EQW_ports_2) / 100, axis=0)
+fig5 = plt.figure()
+axes = fig5.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+x = EQW_period_2
+y = NAV_P8_2_return_2
+axes.plot(x,y)
+axes.legend(["Bench: EQW weighted", "Tracking without short-sale const", "Tracking with short-sale const", "EQW Tilted"])
+axes.set_xlabel('Dates')
+axes.set_ylabel('Prtf Value')
+axes.set_title('Portfolio values for the period January 1990 to December 2019')
+fig5.show()
+fig5.savefig('B8_EQW_2.png')
+
+EQW_ports_3 = EQW_ports.loc["2000-01-01":, :]
+EQW_period_3 = Value_BM.index["2000-01-01" <= Value_BM.index]
+NAV_P8_2_return_3 = np.cumprod(1 + np.array(EQW_ports_3) / 100, axis=0)
+fig6 = plt.figure()
+axes = fig6.add_axes([0.1, 0.1, 0.8, 0.8])  # left, bottom, width, height (range 0 to 1)
+x = EQW_period_3
+y = NAV_P8_2_return_3
+axes.plot(x,y)
+axes.legend(["Bench: EQW weighted", "Tracking without short-sale const", "Tracking with short-sale const", "EQW Tilted"])
+axes.set_xlabel('Dates')
+axes.set_ylabel('Prtf Value')
+axes.set_title('Portfolio values for the period January 2000 to December 2019')
+fig6.show()
+fig6.savefig('B8_EQW_3.png')
 
 
 date_tmp = myf.eomonth(EQW_ports.index)

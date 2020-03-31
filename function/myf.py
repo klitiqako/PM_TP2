@@ -281,10 +281,10 @@ def objective_8(theta, w_bar, x1, x2, x3, monthly_ret, gamma):
 
     opt_weight = w_bar + theta_x
 
-    opt_weight[opt_weight < 0] = 0
-    sum_weight = np.sum(opt_weight, axis=1)
-    sum_weight = sum_weight[np.newaxis]
-    opt_weight = opt_weight / sum_weight.T
+    #opt_weight[opt_weight < 0] = 0
+    #sum_weight = np.sum(opt_weight, axis=1)
+    #sum_weight = sum_weight[np.newaxis]
+    #opt_weight = opt_weight / sum_weight.T
 
     ret_i_t = opt_weight * ( monthly_ret / 100)
 
@@ -328,7 +328,7 @@ def prtf8(theta, w_bar, x1, x2, x3, monthly_ret):
     sum_weight = sum_weight[np.newaxis]
     opt_weight = opt_weight / sum_weight.T
     
-    ret_i_t = opt_weight * (monthly_ret / 100)
+    ret_i_t = opt_weight * monthly_ret
 
     ret_t = np.sum(ret_i_t)  # summing over the col
 
